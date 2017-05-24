@@ -1,0 +1,9 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+	label: 'Plugin Name',
+	instructions: 'The name of the plugin users will see',
+	name: 'pluginName',
+	id: 'pluginName',
+	value: settings.pluginName is defined ? settings.pluginName : ''
+}) }}

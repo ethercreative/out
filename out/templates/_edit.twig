@@ -1,0 +1,108 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set fullPageForm = true %}
+
+{% macro dateTimeField(event, attribute, label) %}
+
+	{% import "_includes/forms" as forms %}
+
+	{% set input %}
+		<div style="display:inline-block">
+			{{ forms.date({
+				id:        attribute,
+				name:      attribute,
+				value:     event.getAttribute(attribute),
+				errors:    event.getErrors(attribute),
+			}) }}
+		</div>
+
+		<div style="display:inline-block">
+			{{ forms.time({
+				id:        attribute,
+				name:      attribute,
+				value:     event.getAttribute(attribute),
+				errors:    event.getErrors(attribute),
+			}) }}
+		</div>
+	{% endset %}
+
+	{{ forms.field({
+		id:       attribute,
+		label:    label,
+		first:    (attribute == 'startDate'),
+		required: false
+	}, input) }}
+
+{% endmacro %}
+
+{% from _self import dateTimeField %}
+
+{% block saveButton %}
+	<input type="hidden" name="action" value="out/save">
+	<input type="hidden" name="redirect" value="out">
+	{% if report.id %}<input type="hidden" name="reportId" value="{{ report.id }}">{% endif %}
+	{{ getCsrfInput() }}
+
+	<div class="btngroup">
+		<input type="submit" class="btn submit" value="{{ 'Save report'|t }}">
+	</div>
+{% endblock %}
+
+{% block main %}
+	<div class="grid first" data-max-cols="3">
+		<div class="item" data-position="left" data-colspan="2">
+			<div id="fields" class="pane">
+				{{ forms.textField({
+					label: "Title"|t,
+					id: 'title',
+					name: 'title',
+					value: report.title,
+					errors: report.getErrors('title'),
+					first: true,
+					autofocus: true,
+					required: true
+				}) }}
+
+				<ul id="mapping" class="out--mapping"></ul>
+
+				<textarea name="mapping" id="mappingField">{{ report.mapping }}</textarea>
+			</div>
+		</div><!--/item-->
+
+		<div class="item" data-position="right">
+			<div id="settings" class="pane meta">
+				{{ forms.selectField({
+					label: "Channel",
+					id: "channel",
+					name: "channel",
+					required: true,
+					options: channels,
+					value: report.channelId
+				}) }}
+
+				{{ forms.selectField({
+					label: "Entry Type",
+					id: "type",
+					name: "type",
+					required: true,
+					options: types[channels|keys|first],
+					value: report.typeId
+				}) }}
+			</div>
+
+			<div id="modifiers" class="pane meta">
+				{{ forms.textField({
+					label: "Search Query",
+					id: "query",
+					name: "query",
+					value: report.query,
+				}) }}
+
+				{{ dateTimeField(report, 'startDate', "Start Date"|t, true) }}
+
+				{{ dateTimeField(report, 'endDate', "End Date"|t, false) }}
+			</div>
+		</div><!--/item-->
+	</div><!--/grid-->
+{% endblock %}
