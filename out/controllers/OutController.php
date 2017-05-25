@@ -181,7 +181,7 @@ class OutController extends BaseController
 		craft()->out->save($report);
 
 		craft()->request->sendFile(
-			StringHelper::toCamelCase($report->title) . '.csv',
+			StringHelper::toKebabCase($report->title) . '.csv',
 			craft()->out->download($report),
 			array('forceDownload' => true, 'mimeType' => 'text/csv')
 		);

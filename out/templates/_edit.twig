@@ -86,7 +86,7 @@
 					id: "type",
 					name: "type",
 					required: true,
-					options: types[channels|keys|first],
+					options: types[report.channelId ?: channels|keys|first],
 					value: report.typeId
 				}) }}
 			</div>
