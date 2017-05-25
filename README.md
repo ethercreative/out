@@ -13,6 +13,8 @@ A super-simple plugin for creating CSV exports of you Craft entry data.
 - [ ] Syntax highlighting for Twig code editor
 - [ ] Ability to add custom columns for unique data output
 - [ ] Locale support
+- [ ] Permissions
+- [ ] Hooks / Events
 
 ## Changelog
 

@@ -180,11 +180,15 @@ class OutController extends BaseController
 		$report->lastDownloaded = new DateTime;
 		craft()->out->save($report);
 
-		craft()->request->sendFile(
-			StringHelper::toKebabCase($report->title) . '.csv',
-			craft()->out->download($report),
-			array('forceDownload' => true, 'mimeType' => 'text/csv')
-		);
+		$filename = StringHelper::toKebabCase($report->title);
+
+		header("Content-Type: application/csv");
+		header("Content-Disposition: attachment; filename={$filename}.csv");
+		header("Pragma: no-cache");
+
+		echo craft()->out->download($report);
+
+		craft()->end();
 	}
 
 }
