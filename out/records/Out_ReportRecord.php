@@ -20,6 +20,8 @@ class Out_ReportRecord extends BaseRecord
 			"startDate"      => [AttributeType::DateTime],
 			"endDate"        => [AttributeType::DateTime],
 			"lastDownloaded" => [AttributeType::DateTime],
+			"sorting"        => [AttributeType::String],
+			"limit"          => [AttributeType::Number],
 		];
 	}
 

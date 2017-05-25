@@ -6,7 +6,6 @@ A super-simple plugin for creating CSV exports of you Craft entry data.
 
 ## TODO
 
-- [ ] Add sorting support
 - [ ] Add search query cheat-sheet
 - [ ] Add matrix support?
 - [ ] Support more than just channels (i.e. Commerce Products)

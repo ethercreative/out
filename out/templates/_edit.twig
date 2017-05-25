@@ -99,6 +99,40 @@
 					value: report.query,
 				}) }}
 
+				{{ forms.textField({
+					label: "Limit",
+					id: "limit",
+					name: "limit",
+					type: "number",
+					min: 1,
+					placeholder: "Unlimited",
+					value: report.limit
+				}) }}
+
+				{% set sortInput %}
+					<div class="out--sort">
+						{{ forms.select({
+							id: "sortField",
+							options: { "title": "Title" },
+						}) }}
+
+						{{ forms.select({
+							id: "sortDir",
+							options: {
+								"asc": "Ascending",
+								"desc": "Descending",
+							},
+						}) }}
+
+						<input type="hidden" id="sorting" name="sorting"
+						       value="{{ report.sorting }}">
+					</div>
+				{% endset %}
+
+				{{ forms.field({
+					label: "Sort By",
+				}, sortInput) }}
+
 				{{ dateTimeField(report, 'startDate', "Start Date"|t, true) }}
 
 				{{ dateTimeField(report, 'endDate', "End Date"|t, false) }}

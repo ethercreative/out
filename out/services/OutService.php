@@ -36,6 +36,8 @@ class OutService extends BaseApplicationComponent
 		$record->startDate      = $report->startDate;
 		$record->endDate        = $report->endDate;
 		$record->lastDownloaded = $report->lastDownloaded;
+		$record->sorting        = $report->sorting;
+		$record->limit          = $report->limit;
 
 		$record->validate();
 		$report->addErrors($record->getErrors());
@@ -76,17 +78,27 @@ class OutService extends BaseApplicationComponent
 	public function download (Out_ReportModel $report)
 	{
 		// TODO: Break into chunks of 100?
-		// TODO: Add sorting
 		$criteria = craft()->elements->getCriteria("Entry");
-		$criteria->limit = null;
+
+		if (!empty($report->limit) && is_numeric($report->limit) && $report->limit > 0)
+			$criteria->limit = $report->limit;
+		else
+			$criteria->limit = null;
+
 		$criteria->sectionId = $report->channelId;
 		$criteria->type = craft()->sections->getEntryTypeById($report->typeId)->handle;
+
 		if ($report->startDate)
 			$criteria->after = $report->startDate;
+
 		if ($report->endDate)
 			$criteria->before = $report->endDate;
+
 		if ($report->query)
 			$criteria->search = $report->query;
+
+		if ($report->sorting)
+			$criteria->order = $report->sorting;
 
 		ob_start();
 

@@ -7,10 +7,15 @@ class Out { // eslint-disable-line no-unused-vars
 		this.types = types;
 		this.fields = fields;
 		this.mapping = mapping ? mapping : [];
+	
 		this.channelField = document.getElementById("channel");
 		this.typeField = document.getElementById("type");
 		this.mappingField = document.getElementById("mappingField");
 		this.mappingContainer = document.getElementById("mapping");
+		
+		this.sortField = document.getElementById("sortField");
+		this.sortDir = document.getElementById("sortDir");
+		this.sortingField = document.getElementById("sorting");
 		
 		this.sort = null;
 		this.modal = null;
@@ -117,6 +122,32 @@ class Out { // eslint-disable-line no-unused-vars
 		});
 		
 		this.onMappingChange();
+		this.initializeSorting(fieldsOfType);
+	}
+	
+	initializeSorting (fields) {
+		while (this.sortField.firstElementChild)
+			this.sortField.removeChild(this.sortField.firstElementChild);
+		
+		const [selectedField, selectedDir] = this.sortingField.value.split(" ");
+		
+		fields.forEach(field => {
+			const attrs = {
+				"value": field.handle,
+			};
+			
+			if (selectedField && selectedField === field.handle)
+				attrs["selected"] = true;
+			
+			this.sortField.appendChild(
+				Out.createElement("option", attrs, field.name)
+			);
+		});
+		
+		if (selectedDir)
+			this.sortDir.value = selectedDir;
+		
+		this.onSortChange();
 	}
 	
 	// Events
@@ -131,6 +162,9 @@ class Out { // eslint-disable-line no-unused-vars
 			"change",
 			this.onTypeChange.bind(this)
 		);
+		
+		this.sortField.addEventListener("change", this.onSortChange.bind(this));
+		this.sortDir.addEventListener("change", this.onSortChange.bind(this));
 	}
 	
 	onChannelChange () {
@@ -244,6 +278,10 @@ class Out { // eslint-disable-line no-unused-vars
 		});
 		
 		this.mappingField.value = JSON.stringify(this.mapping);
+	}
+	
+	onSortChange () {
+		this.sortingField.value = `${this.sortField.value} ${this.sortDir.value}`;
 	}
 	
 	// Helpers

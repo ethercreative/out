@@ -131,6 +131,8 @@ class OutController extends BaseController
 		$report->channelId = craft()->request->getPost("channel");
 		$report->typeId    = craft()->request->getPost("type");
 		$report->query     = craft()->request->getPost("query");
+		$report->limit     = craft()->request->getPost("limit");
+		$report->sorting   = craft()->request->getPost("sorting");
 		$report->startDate =
 			(($startDate = craft()->request->getPost('startDate'))
 				? DateTime::createFromString($startDate, craft()->timezone)

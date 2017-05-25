@@ -12,6 +12,8 @@ namespace Craft;
  * @property {DateTime} startDate
  * @property {DateTime} endDate
  * @property {DateTime} lastDownloaded
+ * @property {String} sorting
+ * @property {Number} limit
  * @package Craft
  */
 class Out_ReportModel extends BaseElementModel
@@ -31,6 +33,8 @@ class Out_ReportModel extends BaseElementModel
 				"startDate"      => AttributeType::DateTime,
 				"endDate"        => AttributeType::DateTime,
 				"lastDownloaded" => AttributeType::DateTime,
+			    "sorting"        => AttributeType::String,
+			    "limit"          => AttributeType::Number,
 			]
 		);
 	}

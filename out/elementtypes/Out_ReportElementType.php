@@ -36,7 +36,7 @@ class Out_ReportElementType extends BaseElementType
 			"startDate"      => "Start Date",
 			"endDate"        => "End Date",
 			"lastDownloaded" => "Last Downloaded",
-		    "actions"       => "Actions",
+		    "actions"        => "Actions",
 		];
 	}
 
@@ -102,9 +102,7 @@ class Out_ReportElementType extends BaseElementType
 		ElementCriteriaModel $criteria
 	) {
 		$query
-			->addSelect(
-				"reports.startDate, reports.endDate, reports.lastDownloaded, reports.query, reports.mapping, reports.channelId, reports.typeId"
-			)->join(
+			->addSelect("reports.*")->join(
 				"out_reports reports",
 				"reports.id = elements.id"
 			);
