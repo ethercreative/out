@@ -6,7 +6,7 @@ class OutPlugin extends BasePlugin {
 
 	public function getName ()
 	{
-		return "Out";
+		return $this->getSettings()->pluginName;
 	}
 
 	public function getDescription ()
@@ -39,7 +39,7 @@ class OutPlugin extends BasePlugin {
 		return [
 			"pluginName" => [
 				AttributeType::String,
-				"default" => $this->getName()
+				"default" => "Out"
 			],
 		];
 	}

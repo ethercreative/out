@@ -2,6 +2,18 @@
 
 namespace Craft;
 
+/**
+ * Class Out_ReportModel
+ *
+ * @property {Array} mapping
+ * @property {Number} channelId
+ * @property {Number} typeId
+ * @property {String} query
+ * @property {DateTime} startDate
+ * @property {DateTime} endDate
+ * @property {DateTime} lastDownloaded
+ * @package Craft
+ */
 class Out_ReportModel extends BaseElementModel
 {
 

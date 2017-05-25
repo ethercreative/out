@@ -5,6 +5,8 @@ namespace Craft;
 class OutController extends BaseController
 {
 
+	protected $allowAnonymous = ["actionDownload"];
+
 	public function actionIndex ()
 	{
 		$this->renderTemplate('out/_index');
@@ -12,6 +14,7 @@ class OutController extends BaseController
 
 	public function actionCreateEdit (array $variables = [])
 	{
+
 		if (empty($variables['report'])) {
 			if (!empty($variables['reportId'])) {
 				$variables['report'] =
@@ -31,9 +34,6 @@ class OutController extends BaseController
 			$variables['title'] = $variables['report']->title;
 		}
 
-		// FIXME: This shouldn't be null :(
-		Craft::dd($variables['report']->mapping);
-
 		$variables['crumbs'] = [
 			[
 				'label' => Craft::t('Reports'),
@@ -47,7 +47,20 @@ class OutController extends BaseController
 
 		$channels = [];
 		$types    = [];
-		$fields   = [];
+		$fields   = [
+			"-1" => [
+				[
+					"name" => "Title",
+				    "handle" => "title",
+				    "type" => "Plain Text",
+				],
+			    [
+			    	"name" => "Post Date",
+			        "handle" => "postDate",
+			        "type" => "Date/Time"
+			    ]
+			]
+		];
 
 		foreach (
 			craft()->sections->getSectionsByType(SectionType::Channel) as
@@ -157,6 +170,21 @@ class OutController extends BaseController
 		} else {
 			craft()->userSession->setError(Craft::t('Couldn’t delete report.'));
 		}
+	}
+
+	public function actionDownload ()
+	{
+		$id = craft()->request->getRequiredQuery("id");
+		$report = craft()->out->getReportById($id);
+
+		$report->lastDownloaded = new DateTime;
+		craft()->out->save($report);
+
+		craft()->request->sendFile(
+			StringHelper::toCamelCase($report->title) . '.csv',
+			craft()->out->download($report),
+			array('forceDownload' => true, 'mimeType' => 'text/csv')
+		);
 	}
 
 }

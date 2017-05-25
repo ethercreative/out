@@ -31,7 +31,10 @@ class Out { // eslint-disable-line no-unused-vars
 				this.mappingContainer.firstElementChild
 			);
 		
-		const fieldsOfType = this.fields[this.typeField.value];
+		const fieldsOfType = [
+			...this.fields[-1],
+			...this.fields[this.typeField.value]
+		];
 		const validFieldHandles = fieldsOfType.map(field => field.handle);
 		
 		const handlesFromMapping = [];
@@ -45,7 +48,7 @@ class Out { // eslint-disable-line no-unused-vars
 				b.type,
 				b.name,
 				"",
-				false
+				true
 			));
 			
 			return a;

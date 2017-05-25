@@ -66,7 +66,7 @@
 
 				<ul id="mapping" class="out--mapping"></ul>
 
-				<textarea name="mapping" id="mappingField">{{ report.mapping }}</textarea>
+				<textarea name="mapping" id="mappingField">{{ report.mapping|json_encode }}</textarea>
 			</div>
 		</div><!--/item-->
 
@@ -102,6 +102,17 @@
 				{{ dateTimeField(report, 'startDate', "Start Date"|t, true) }}
 
 				{{ dateTimeField(report, 'endDate', "End Date"|t, false) }}
+
+				<div class="field" id="enabled-field">
+					<div class="heading"><label></label></div>
+					<div class="input ltr">
+						<div class="left"></div>
+
+						<div class="right">
+							<input type="button" class="btn small formsubmit" value="Delete" data-action="out/delete" data-confirm="Are you sure you want to delete this report?" data-redirect="out">
+						</div>
+					</div>
+				</div>
 			</div>
 		</div><!--/item-->
 	</div><!--/grid-->

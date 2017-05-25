@@ -36,6 +36,7 @@ class Out_ReportElementType extends BaseElementType
 			"startDate"      => "Start Date",
 			"endDate"        => "End Date",
 			"lastDownloaded" => "Last Downloaded",
+		    "actions"       => "Actions",
 		];
 	}
 
@@ -64,16 +65,20 @@ class Out_ReportElementType extends BaseElementType
 				/** @var DateTime $date */
 				$date = $element->$attribute;
 
-				return $date ? $date->localeDate() : "Never";
+				return $date ? $date->localeTime() . " - " . $date->localeDate() : "Never";
 			}
-//			case "channel": {
-//				$channel = craft()->sections->getSectionById($element->channelId);
-//				return $channel->name;
-//			}
-//			case "type": {
-//				$type = craft()->sections->getEntryTypeById($element->typeId);
-//				return $type->name;
-//			}
+			case "channelId": {
+				$channel = craft()->sections->getSectionById($element->channelId);
+				return $channel->name;
+			}
+			case "typeId": {
+				$type = craft()->sections->getEntryTypeById($element->typeId);
+				return $type->name;
+			}
+			case "actions": {
+				$dl = UrlHelper::getActionUrl("out/download", ["id" => $element->id]);
+				return "<a href='{$dl}' title='Download'><svg height=\"19px\" version=\"1.1\" viewBox=\"0 0 14 19\" width=\"14px\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"none\" fill-rule=\"evenodd\" stroke=\"none\" stroke-width=\"1\"><g fill=\"#0d78f2\" transform=\"translate(-383.000000, -213.000000)\"><g transform=\"translate(383.000000, 213.500000)\"><path d=\"M14,6 L10,6 L10,0 L4,0 L4,6 L0,6 L7,13 L14,6 L14,6 Z M0,15 L0,17 L14,17 L14,15 L0,15 L0,15 Z\" /></g></g></g></svg></a>";
+			}
 			default:
 				return parent::getTableAttributeHtml($element, $attribute);
 		}
@@ -98,7 +103,7 @@ class Out_ReportElementType extends BaseElementType
 	) {
 		$query
 			->addSelect(
-				"reports.startDate, reports.endDate, reports.lastDownloaded"
+				"reports.startDate, reports.endDate, reports.lastDownloaded, reports.query, reports.mapping, reports.channelId, reports.typeId"
 			)->join(
 				"out_reports reports",
 				"reports.id = elements.id"
@@ -142,12 +147,12 @@ class Out_ReportElementType extends BaseElementType
 
 	public function getEditorHtml (BaseElementModel $element)
 	{
-		// TODO: Pass all fields here?
+		// FIXME: Inline editing support
 
 		$html = craft()->templates->render(
 			'out/_edit',
 			[
-				'element' => $element,
+				'report' => $element,
 			]
 		);
 
