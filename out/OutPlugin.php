@@ -16,7 +16,7 @@ class OutPlugin extends BasePlugin {
 
 	public function getVersion ()
 	{
-		return "0.0.1";
+		return "1.0.0";
 	}
 
 	public function getSchemaVersion ()
@@ -63,6 +63,11 @@ class OutPlugin extends BasePlugin {
 			"out/new" => ["action" => "out/createEdit"],
 			"out/(?P<reportId>\d+)" => ["action" => "out/createEdit"],
 		];
+	}
+
+	public function getReleaseFeedUrl ()
+	{
+		return "https://raw.githubusercontent.com/ethercreative/out/master/releases.json";
 	}
 
 }
