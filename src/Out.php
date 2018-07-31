@@ -9,6 +9,9 @@
 namespace ether\out;
 
 use craft\base\Plugin;
+use craft\events\RegisterUrlRulesEvent;
+use craft\web\UrlManager;
+use yii\base\Event;
 
 
 /**
@@ -23,7 +26,32 @@ class Out extends Plugin
 	// =========================================================================
 
 	public $schemaVersion = '1.0.0';
-	public $hasCpSettings = true;
+	public $hasCpSettings = false;
 	public $hasCpSection  = true;
+
+	// Initialize
+	// =========================================================================
+
+	public function init ()
+	{
+		parent::init();
+
+		// Events
+		// ---------------------------------------------------------------------
+
+		Event::on(
+			UrlManager::class,
+			UrlManager::EVENT_REGISTER_CP_URL_RULES,
+			[$this, 'onRegisterCpUrlRules']
+		);
+	}
+
+	// Events
+	// =========================================================================
+
+	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
+	{
+		$event->rules['out/new'] = 'out/out/edit';
+	}
 
 }
