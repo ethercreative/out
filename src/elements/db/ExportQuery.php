@@ -29,12 +29,12 @@ class ExportQuery extends ElementQuery
 			'out_exports.title',
 			'out_exports.elementType',
 			'out_exports.elementSource',
+			'out_exports.order',
 			'out_exports.search',
 			'out_exports.limit',
 			'out_exports.startDate',
 			'out_exports.endDate',
 			'out_exports.fieldSettings',
-			'out_exports.fieldLayoutId',
 		]);
 
 		return parent::beforePrepare();

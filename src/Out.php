@@ -11,10 +11,13 @@ namespace ether\out;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
 use craft\web\UrlManager;
+use ether\out\services\OutService;
 use yii\base\Event;
 
 
 /**
+ * @property OutService $out
+ *
  * @author  Ether Creative
  * @package ether\out
  * @since   1.0.0
@@ -36,6 +39,10 @@ class Out extends Plugin
 	{
 		parent::init();
 
+		$this->setComponents([
+			'out' => OutService::class,
+		]);
+
 		// Events
 		// ---------------------------------------------------------------------
 
@@ -53,6 +60,7 @@ class Out extends Plugin
 	{
 		$event->rules['out/new'] = 'out/out/edit';
 		$event->rules['out/<exportId:\d+>'] = 'out/out/edit';
+		$event->rules['out/dl/<exportId:\d+>'] = 'out/out/dl';
 	}
 
 }

@@ -23,7 +23,7 @@
 
 		<div class="btn submit menubtn"></div>
 		<div class="menu">
-			<ul>
+			{#<ul>
 				<li>
 					<a class="formsubmit"
 				       data-redirect="{{ continueEditingUrl|hash }}">
@@ -47,9 +47,9 @@
 						</a>
 					</li>
 				{% endif %}
-			</ul>
+			</ul>#}
 			{% if not isNewExport %}
-				<hr>
+				{#<hr>#}
 				<ul>
 					<li>
 						<a class="formsubmit error"
@@ -66,48 +66,6 @@
 {% endblock %}
 
 {% js %}
-const out_BaseDrag = Craft.FieldLayoutDesigner.BaseDrag
-	, out_TabDrag = Craft.FieldLayoutDesigner.TabDrag
-	, out_FieldDrag = Craft.FieldLayoutDesigner.FieldDrag;
-
-Craft.FieldLayoutDesigner = Craft.FieldLayoutDesigner.extend({
-
-	initField: function ($field) {
-		var $editBtn = $field.find('.settings'),
-			$menu = $('<div class="menu" data-align="center"/>').insertAfter($editBtn),
-			$ul = $('<ul/>').appendTo($menu);
-
-		$('<li><a data-action="edit">' + Craft.t('app', 'Edit') + '</a></li>').appendTo($ul);
-		$('<li><a data-action="remove">' + Craft.t('app', 'Remove') + '</a></li>').appendTo($ul);
-
-		new Garnish.MenuBtn($editBtn, {
-			onOptionSelect: $.proxy(this, 'onFieldOptionSelect')
-		});
-	},
-
-	onFieldOptionSelect: function (option) {
-		var $option = $(option),
-			$field = $option.data('menu').$anchor.parent(),
-			action = $option.data('action');
-
-		switch (action) {
-			case 'edit': {
-				window.Out.edit($field[0]);
-				break;
-			}
-			case 'remove': {
-				this.removeField($field);
-				break;
-			}
-		}
-	},
-
-});
-
-Craft.FieldLayoutDesigner.BaseDrag = out_BaseDrag;
-Craft.FieldLayoutDesigner.TabDrag = out_TabDrag;
-Craft.FieldLayoutDesigner.FieldDrag = out_FieldDrag;
-
 Out.init({{ fields|json_encode|raw }});
 {% endjs %}
 
@@ -132,16 +90,19 @@ Out.init({{ fields|json_encode|raw }});
 			errors: export.getErrors('title'),
 		}) }}
 
-		<div>
-			{% include "_includes/fieldlayoutdesigner" with {
-				instructions: "Click the cog to edit a fields column settings",
-				customizableTabs: false,
-				pretendTabName: "Columns",
-				fieldLayout: export.fieldLayout
-			} only %}
-		</div>
+		<ul class="out--fields" id="outFields">
+			{% for key, field in fields %}
+				<li>
+					{{ field.name }}
 
-		<input type="hidden" name="fieldSettings" id="fieldSettings" value="{{ export.fieldSettings }}">
+					<button type="button" data-key="{{ key }}">
+						Settings
+					</button>
+				</li>
+			{% endfor %}
+		</ul>
+
+		<input type="hidden" name="fieldSettings" id="fieldSettings" value="{{ export.fieldSettings|json_encode }}">
 	</div>
 
 {% endblock %}
@@ -173,6 +134,13 @@ Out.init({{ fields|json_encode|raw }});
 				{%- endblock %}
 			{% endembed %}
 		{% endfor %}
+
+		{{ forms.textField({
+			label: 'Order',
+			id: 'order',
+			name: 'order',
+			value: export.order,
+		}) }}
 
 		{{ forms.textField({
 			label: 'Search Query',

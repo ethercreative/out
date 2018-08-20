@@ -11,9 +11,11 @@ namespace ether\out\controllers;
 use craft\base\Element;
 use craft\base\Field;
 use craft\helpers\DateTimeHelper;
+use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use ether\out\elements\Export;
+use ether\out\Out;
 use ether\out\web\assets\OutAsset;
 use yii\web\HttpException;
 
@@ -27,45 +29,6 @@ use yii\web\HttpException;
  */
 class OutController extends Controller
 {
-
-	const QUERY_IGNORE = [
-		'withTransforms',
-		'elementType',
-		'query',
-		'subQuery',
-		'contentTable',
-		'customFields',
-		'inReverse',
-		'asArray',
-		'uid',
-		'fixedOrder',
-		'leaves',
-		'ref',
-		'with',
-		'level',
-		'ancestorDist',
-		'descendantDist',
-		'select',
-		'selectOption',
-		'distinct',
-		'from',
-		'join',
-		'having',
-		'union',
-		'params',
-		'queryCacheDuration',
-		'queryCacheDependency',
-		'where',
-		'indexBy',
-		'emulateExecution',
-		'withStructure',
-		'structureId',
-
-		'editable',
-		'enabledForSite',
-		'siteId',
-		'relatedTo',
-	];
 
 	/**
 	 * @param string|null $exportId
@@ -135,13 +98,7 @@ class OutController extends Controller
 		}
 
 		// Fields
-		$fields = [];
-
-		/** @var Field $field */
-		foreach ($craft->fields->getAllFields() as $field)
-			$fields[$field->id] = $field->handle;
-
-		$variables['fields'] = $fields;
+		$variables['fields'] = Out::getInstance()->out->fields();
 
 		// Asset
 		$craft->view->registerAssetBundle(OutAsset::class);
@@ -160,11 +117,6 @@ class OutController extends Controller
 	 */
 	public function actionSave ()
 	{
-		$fieldLayout = \Craft::$app->getFields()->assembleLayoutFromPost();
-		$fieldLayout->type = Export::class;
-		if (!\Craft::$app->getFields()->saveLayout($fieldLayout))
-			\Craft::dd($fieldLayout->getErrors());
-
 		$request = \Craft::$app->request;
 
 		$export = new Export();
@@ -172,17 +124,65 @@ class OutController extends Controller
 		$export->title = $request->getRequiredParam('title');
 		$export->elementType = $request->getRequiredParam('elementType');
 		$export->elementSource = $request->getRequiredParam('elementSource');
+		$export->order = $request->getParam('order');
 		$export->search = $request->getParam('search');
 		$export->limit = $request->getParam('limit');
 		$export->startDate = DateTimeHelper::toDateTime($request->getParam('startDate')) ?: null;
 		$export->endDate = DateTimeHelper::toDateTime($request->getParam('endDate')) ?: null;
 		$export->fieldSettings = $request->getParam('fieldSettings');
-		$export->fieldLayoutId = $fieldLayout->id;
 
 		if (!\Craft::$app->elements->saveElement($export))
-			\Craft::dd($export->getErrors());
+		{
+			\Craft::$app->getSession()->setError(
+				\Craft::t('out', 'Couldn’t save export.')
+			);
+
+
+			\Craft::$app->getUrlManager()->setRouteParams([
+				'export' => $export
+			]);
+
+			return null;
+		}
 
 		$this->redirect($export->getCpEditUrl());
+	}
+
+	/**
+	 * @throws \Throwable
+	 * @throws \yii\web\BadRequestHttpException
+	 */
+	public function actionDelete ()
+	{
+		$exportId = \Craft::$app->getRequest()->getRequiredBodyParam('exportId');
+		\Craft::$app->elements->deleteElementById($exportId);
+
+		return $this->redirect(UrlHelper::cpUrl('out'));
+	}
+
+	/**
+	 * @param $exportId
+	 *
+	 * @throws HttpException
+	 * @throws \yii\base\ExitException
+	 */
+	public function actionDl ($exportId)
+	{
+		/** @var Export $export */
+		$export = Export::find()->id($exportId)->one();
+		if (!$export) throw new HttpException(404);
+
+		$filename = StringHelper::toKebabCase($export->title);
+
+		$csv = Out::getInstance()->out->generate($export);
+
+		header("Content-Type: application/csv");
+		header("Content-Disposition: attachment; filename={$filename}.csv");
+		header("Pragma: no-cache");
+
+		echo $csv;
+
+		\Craft::$app->end();
 	}
 
 }

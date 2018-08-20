@@ -75,6 +75,7 @@ window.onload = function () {
 
 		return elem;
 	};
+
 	const f = function (config) {
 		return h("div", { class: "field" }, [
 			h("div", { class: "heading" }, [
@@ -103,6 +104,7 @@ window.onload = function () {
 		headingInput: null,
 		twigInput: null,
 		escapeInput: null,
+		enabledInput: null,
 
 		fieldSettings: null,
 
@@ -113,12 +115,26 @@ window.onload = function () {
 			this.fieldMap = fieldMap;
 
 			this.fieldSettings = document.getElementById("fieldSettings");
-			this.fields = JSON.parse(JSON.parse(this.fieldSettings.value));
+			this.fields = JSON.parse(this.fieldSettings.value);
 			if (Array.isArray(this.fields)) this.fields = {};
+
+			const btns = document.getElementById("outFields").getElementsByTagName("button");
+			for (let i = 0, l = btns.length; i < l; ++i)
+				btns[i].addEventListener("click", this.edit.bind(this));
 
 			this.modal = new Garnish.Modal(
 				h("div", { class: "modal out--modal" }, [
 					h("div", { class: "body" }, [
+						f({
+							label: "Enabled",
+							id: "out_enabled",
+							tag: "input",
+							attr: {
+								type: "checkbox",
+								checked: false,
+								ref: el => { this.enabledInput = el; }
+							},
+						}),
 						f({
 							label: "Column Heading",
 							id: "out_columnHeading",
@@ -172,8 +188,9 @@ window.onload = function () {
 			);
 		},
 
-		edit (field) {
-			this.setValues(field);
+		edit (e) {
+			e.preventDefault();
+			this.setValues(e.target);
 			this.modal.show();
 		},
 
@@ -181,13 +198,14 @@ window.onload = function () {
 		// =====================================================================
 
 		setValues (field) {
-			const fieldId = field.dataset.id;
+			const fieldKey = field.dataset.key;
 
-			this.activeFieldId = fieldId;
+			this.activeFieldId = fieldKey;
 
-			if (this.fields.hasOwnProperty(fieldId)) {
-				const p = this.fields[fieldId];
+			if (this.fields.hasOwnProperty(fieldKey)) {
+				const p = this.fields[fieldKey];
 
+				this.enabledInput.checked = p.enabled;
 				this.headingInput.value = p.heading;
 				this.twigInput.value = p.twig;
 				this.escapeInput.checked = p.escape;
@@ -195,12 +213,17 @@ window.onload = function () {
 				return;
 			}
 
-			this.headingInput.value = field.textContent.trim();
-			this.twigInput.value = `{{ element.${this.fieldMap[fieldId]} }}`;
+			const f = this.fieldMap[fieldKey];
+
+			this.enabledInput.checked = false;
+			this.headingInput.value = f.name;
+			this.twigInput.value = `{{ element.${f.handle} }}`;
+			this.escapeInput.checked = true;
 		},
 
 		update () {
 			this.fields[this.activeFieldId] = {
+				enabled: this.enabledInput.checked,
 				heading: this.headingInput.value,
 				twig: this.twigInput.value,
 				escape: this.escapeInput.checked,

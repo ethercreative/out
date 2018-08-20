@@ -10,6 +10,7 @@ namespace ether\out\elements;
 
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
+use craft\helpers\Json;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
 use ether\out\elements\db\ExportQuery;
@@ -17,6 +18,8 @@ use ether\out\elements\db\ExportQuery;
 
 /**
  * Class Export
+ *
+ * @property array $fieldSettings
  *
  * @author  Ether Creative
  * @package ether\out\elements
@@ -35,6 +38,9 @@ class Export extends Element
 	public $elementSource;
 
 	/** @var string|null */
+	public $order = null;
+
+	/** @var string|null */
 	public $search = null;
 
 	/** @var int|null */
@@ -46,11 +52,8 @@ class Export extends Element
 	/** @var \DateTime|null */
 	public $endDate = null;
 
-	/** @var array */
-	public $fieldSettings = [];
-
-	/** @var int */
-	public $fieldLayoutId;
+	/** @var string|array */
+	public $_fieldSettings = [];
 
 	// Craft
 	// =========================================================================
@@ -126,6 +129,7 @@ class Export extends Element
 			'id' => ['label' => \Craft::t('app', 'ID')],
 			'dateCreated' => ['label' => \Craft::t('app', 'Date Created')],
 			'dateUpdated' => ['label' => \Craft::t('app', 'Date Updated')],
+			'dl' => ['label' => 'Download'],
 		];
 	}
 
@@ -136,8 +140,20 @@ class Export extends Element
 		$attrs[] = 'id';
 		$attrs[] = 'dateCreated';
 		$attrs[] = 'dateUpdated';
+		$attrs[] = 'dl';
 
 		return $attrs;
+	}
+
+	protected function tableAttributeHtml (string $attribute): string
+	{
+		if ($attribute === 'dl')
+		{
+			$dl = UrlHelper::cpUrl('out/dl/' . $this->id);
+			return "<a href='{$dl}' title='Download'><svg height=\"19px\" version=\"1.1\" viewBox=\"0 0 14 19\" width=\"14px\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"none\" fill-rule=\"evenodd\" stroke=\"none\" stroke-width=\"1\"><g fill=\"#0d78f2\" transform=\"translate(-383.000000, -213.000000)\"><g transform=\"translate(383.000000, 213.500000)\"><path d=\"M14,6 L10,6 L10,0 L4,0 L4,6 L0,6 L7,13 L14,6 L14,6 Z M0,15 L0,17 L14,17 L14,15 L0,15 L0,15 Z\" /></g></g></g></svg></a>";
+		}
+
+		return parent::tableAttributeHtml($attribute);
 	}
 
 	public static function sortOptions (): array
@@ -159,6 +175,22 @@ class Export extends Element
 		];
 	}
 
+	// Getters / Setters
+	// =========================================================================
+
+	public function setFieldSettings ($value)
+	{
+		$this->_fieldSettings = Json::decodeIfJson($value);
+	}
+
+	public function getFieldSettings (): array
+	{
+		if (is_array($this->_fieldSettings))
+			return $this->_fieldSettings;
+
+		return $this->_fieldSettings = Json::decode($this->_fieldSettings);
+	}
+
 	// Helpers
 	// =========================================================================
 
@@ -168,12 +200,12 @@ class Export extends Element
 			'title'         => $this->title,
 			'elementType'   => $this->elementType,
 			'elementSource' => $this->elementSource,
+			'order'         => $this->order,
 			'search'        => $this->search,
 			'limit'         => $this->limit,
 			'startDate'     => $this->startDate,
 			'endDate'       => $this->endDate,
 			'fieldSettings' => $this->fieldSettings,
-			'fieldLayoutId' => $this->fieldLayoutId,
 		];
 	}
 

@@ -33,13 +33,13 @@ class Install extends Migration
 				'elementType'   => $this->string()->notNull(),
 				'elementSource' => $this->string()->notNull(),
 
+				'order'         => $this->string()->null(),
 				'search'        => $this->string()->null(),
 				'limit'         => $this->integer()->null(),
 				'startDate'     => $this->dateTime()->null(),
 				'endDate'       => $this->dateTime()->null(),
 
 				'fieldSettings' => $this->json()->notNull(),
-				'fieldLayoutId' => $this->integer()->notNull(),
 
 				'dateCreated'   => $this->dateTime()->notNull(),
 				'dateUpdated'   => $this->dateTime()->notNull(),

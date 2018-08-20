@@ -1,5 +1,17 @@
 .out {
 
+	&--fields {
+		li {
+			display: flex;
+			justify-content: space-between;
+			padding: 7px 0;
+
+			&:not(:last-child) {
+				border-bottom: 1px solid #eee;
+			}
+		}
+	}
+
 	&--modal {
 		height: auto !important;
 		min-width: 0 !important;
