@@ -9,7 +9,6 @@
 namespace ether\out\elements\db;
 
 use craft\elements\db\ElementQuery;
-use craft\helpers\Db;
 
 
 /**
@@ -22,29 +21,21 @@ use craft\helpers\Db;
 class ExportQuery extends ElementQuery
 {
 
-	public $elementType;
-
-	public function elementType ($value)
-	{
-		$this->elementType = $value;
-
-		return $this;
-	}
-
 	protected function beforePrepare (): bool
 	{
-		// join in the products table
 		$this->joinElementTable('out_exports');
 
-		// select the elementType column
-		$this->query->select(['out_exports.elementType']);
-
-		if ($this->elementType)
-		{
-			$this->subQuery->andWhere(
-				Db::parseParam('products.elementType', $this->elementType)
-			);
-		}
+		$this->query->select([
+			'out_exports.title',
+			'out_exports.elementType',
+			'out_exports.elementSource',
+			'out_exports.search',
+			'out_exports.limit',
+			'out_exports.startDate',
+			'out_exports.endDate',
+			'out_exports.fieldSettings',
+			'out_exports.fieldLayoutId',
+		]);
 
 		return parent::beforePrepare();
 	}

@@ -113,7 +113,8 @@ window.onload = function () {
 			this.fieldMap = fieldMap;
 
 			this.fieldSettings = document.getElementById("fieldSettings");
-			this.fields = JSON.parse(this.fieldSettings.value);
+			this.fields = JSON.parse(JSON.parse(this.fieldSettings.value));
+			if (Array.isArray(this.fields)) this.fields = {};
 
 			this.modal = new Garnish.Modal(
 				h("div", { class: "modal out--modal" }, [

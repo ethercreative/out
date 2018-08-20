@@ -28,9 +28,19 @@ class Install extends Migration
 			// create the exports table
 			$this->createTable('{{%out_exports}}', [
 				'id'            => $this->integer()->notNull(),
+				'title'         => $this->string()->notNull(),
+
 				'elementType'   => $this->string()->notNull(),
-				'filter'        => $this->json()->notNull(),
+				'elementSource' => $this->string()->notNull(),
+
+				'search'        => $this->string()->null(),
+				'limit'         => $this->integer()->null(),
+				'startDate'     => $this->dateTime()->null(),
+				'endDate'       => $this->dateTime()->null(),
+
+				'fieldSettings' => $this->json()->notNull(),
 				'fieldLayoutId' => $this->integer()->notNull(),
+
 				'dateCreated'   => $this->dateTime()->notNull(),
 				'dateUpdated'   => $this->dateTime()->notNull(),
 				'uid'           => $this->uid(),
@@ -44,6 +54,11 @@ class Install extends Migration
 			);
 		}
 
+	}
+
+	public function safeDown ()
+	{
+		$this->dropTableIfExists('{{%out_exports}}');
 	}
 
 }

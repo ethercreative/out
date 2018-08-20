@@ -10,10 +10,12 @@ namespace ether\out\controllers;
 
 use craft\base\Element;
 use craft\base\Field;
+use craft\helpers\DateTimeHelper;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use ether\out\elements\Export;
 use ether\out\web\assets\OutAsset;
+use yii\web\HttpException;
 
 
 /**
@@ -66,17 +68,28 @@ class OutController extends Controller
 	];
 
 	/**
+	 * @param string|null $exportId
+	 *
 	 * @return \yii\web\Response
+	 * @throws HttpException
 	 * @throws \yii\base\InvalidConfigException
 	 */
-	public function actionEdit ()
+	public function actionEdit ($exportId = null)
 	{
 		$craft = \Craft::$app;
 
 		$variables = [];
 
-		// Title
-		$variables['title'] = 'New Export';
+		// Export
+		if ($exportId)
+		{
+			/** @var Export $export */
+			$export = Export::find()->id($exportId)->one();
+			if (!$export) throw new HttpException(404);
+			$variables['export'] = $export;
+		} else {
+			$variables['export'] = new Export();
+		}
 
 		// Breadcrumbs
 		$variables['crumbs'] = [
@@ -149,14 +162,27 @@ class OutController extends Controller
 	{
 		$fieldLayout = \Craft::$app->getFields()->assembleLayoutFromPost();
 		$fieldLayout->type = Export::class;
-		\Craft::$app->getFields()->saveLayout($fieldLayout);
+		if (!\Craft::$app->getFields()->saveLayout($fieldLayout))
+			\Craft::dd($fieldLayout->getErrors());
+
+		$request = \Craft::$app->request;
 
 		$export = new Export();
-		$export->elementType = \Craft::$app->request->getRequiredParam('elementType');
-		$export->filter = \Craft::$app->request->getRequiredParam('outFilter')[$export->elementType];
+		$export->id = $request->getParam('exportId');
+		$export->title = $request->getRequiredParam('title');
+		$export->elementType = $request->getRequiredParam('elementType');
+		$export->elementSource = $request->getRequiredParam('elementSource');
+		$export->search = $request->getParam('search');
+		$export->limit = $request->getParam('limit');
+		$export->startDate = DateTimeHelper::toDateTime($request->getParam('startDate')) ?: null;
+		$export->endDate = DateTimeHelper::toDateTime($request->getParam('endDate')) ?: null;
+		$export->fieldSettings = $request->getParam('fieldSettings');
 		$export->fieldLayoutId = $fieldLayout->id;
 
-		\Craft::$app->elements->saveElement($export);
+		if (!\Craft::$app->elements->saveElement($export))
+			\Craft::dd($export->getErrors());
+
+		$this->redirect($export->getCpEditUrl());
 	}
 
 }

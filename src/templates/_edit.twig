@@ -5,9 +5,9 @@
 {% set continueEditingUrl = "" %}
 {% set nextExportUrl = "" %}
 {% set isNewExport = false %}
-{% set export = { id: null, title: "" } %}
 {# End Temp #}
 
+{% set title = export.id ? export.title : 'New Export' %}
 {% set fullPageForm = true %}
 {% set saveShortcutRedirect = continueEditingUrl %}
 
@@ -128,20 +128,20 @@ Out.init({{ fields|json_encode|raw }});
 			first: true,
 			autofocus: true,
 			required: true,
-			maxlength: 255
+			maxlength: 255,
+			errors: export.getErrors('title'),
 		}) }}
-		{# errors: export.getErrors('title'), #}
 
 		<div>
 			{% include "_includes/fieldlayoutdesigner" with {
+				instructions: "Click the cog to edit a fields column settings",
 				customizableTabs: false,
 				pretendTabName: "Columns",
-				fieldLayout: craft.app.fields.getLayoutByType('out\\elements\\Export')
+				fieldLayout: export.fieldLayout
 			} only %}
 		</div>
 
-		{# TODO: Pre-fill w/ previous value #}
-		<input type="hidden" name="fieldSettings" id="fieldSettings" value="{}">
+		<input type="hidden" name="fieldSettings" id="fieldSettings" value="{{ export.fieldSettings }}">
 	</div>
 
 {% endblock %}
@@ -152,7 +152,8 @@ Out.init({{ fields|json_encode|raw }});
 			label: 'Element Type'|t('app'),
 			id: 'elementType',
 			name: 'elementType',
-			options: elementTypes
+			options: elementTypes,
+			value: export.elementType,
 		}) }}
 
 		{% for type, sources in elementSources %}
@@ -161,6 +162,7 @@ Out.init({{ fields|json_encode|raw }});
 				id: 'elementSource-' ~ type|replace('\\', '_'),
 				name: 'elementSource',
 				options: sources,
+				value: export.elementSource
 			} %}
 			{% embed '_includes/forms/field' with config|merge({
 				input: forms.select(config)
@@ -174,8 +176,9 @@ Out.init({{ fields|json_encode|raw }});
 
 		{{ forms.textField({
 			label: 'Search Query',
-			id: 'searchQuery',
-			name: 'searchQuery',
+			id: 'search',
+			name: 'search',
+			value: export.search,
 		}) }}
 
 		{{ forms.textField({
@@ -185,18 +188,21 @@ Out.init({{ fields|json_encode|raw }});
 			type: 'number',
 			min: 1,
 			placeholder: 'Unlimited',
+			value: export.limit,
 		}) }}
 
 		{{ forms.dateField({
 			label: 'Start Date',
 			id: 'startDate',
 			name: 'startDate',
+			value: export.startDate,
 		}) }}
 
 		{{ forms.dateField({
 			label: 'End Date',
 			id: 'endDate',
 			name: 'endDate',
+			value: export.endDate,
 		}) }}
 	</div>
 

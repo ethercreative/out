@@ -52,6 +52,7 @@ class Out extends Plugin
 	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
 	{
 		$event->rules['out/new'] = 'out/out/edit';
+		$event->rules['out/<exportId:\d+>'] = 'out/out/edit';
 	}
 
 }
