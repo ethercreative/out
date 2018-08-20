@@ -1,3 +1,7 @@
 {% extends '_layouts/elementindex' %}
 {% set title = 'Exports' %}
 {% set elementType = 'ether\\out\\elements\\Export' %}
+
+{% block actionButton %}
+	<a href="{{ url('out/new') }}" class="btn submit">New Export</a>
+{% endblock %}

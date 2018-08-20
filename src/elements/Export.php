@@ -126,7 +126,7 @@ class Export extends Element
 	protected static function defineTableAttributes (): array
 	{
 		return [
-			'id' => ['label' => \Craft::t('app', 'ID')],
+			'title' => ['label' => \Craft::t('app', 'Title')],
 			'dateCreated' => ['label' => \Craft::t('app', 'Date Created')],
 			'dateUpdated' => ['label' => \Craft::t('app', 'Date Updated')],
 			'dl' => ['label' => 'Download'],
@@ -137,7 +137,7 @@ class Export extends Element
 	{
 		$attrs   = [];
 
-		$attrs[] = 'id';
+		$attrs[] = 'title';
 		$attrs[] = 'dateCreated';
 		$attrs[] = 'dateUpdated';
 		$attrs[] = 'dl';
@@ -159,7 +159,7 @@ class Export extends Element
 	public static function sortOptions (): array
 	{
 		return [
-			'id'          => \Craft::t('app', 'ID'),
+			'title'       => \Craft::t('app', 'Title'),
 			'dateCreated' => \Craft::t('app', 'Date Created'),
 			'dateUpdated' => \Craft::t('app', 'Date Updated'),
 		];
