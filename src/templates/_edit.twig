@@ -65,6 +65,51 @@
 	</div>
 {% endblock %}
 
+{% js %}
+const out_BaseDrag = Craft.FieldLayoutDesigner.BaseDrag
+	, out_TabDrag = Craft.FieldLayoutDesigner.TabDrag
+	, out_FieldDrag = Craft.FieldLayoutDesigner.FieldDrag;
+
+Craft.FieldLayoutDesigner = Craft.FieldLayoutDesigner.extend({
+
+	initField: function ($field) {
+		var $editBtn = $field.find('.settings'),
+			$menu = $('<div class="menu" data-align="center"/>').insertAfter($editBtn),
+			$ul = $('<ul/>').appendTo($menu);
+
+		$('<li><a data-action="edit">' + Craft.t('app', 'Edit') + '</a></li>').appendTo($ul);
+		$('<li><a data-action="remove">' + Craft.t('app', 'Remove') + '</a></li>').appendTo($ul);
+
+		new Garnish.MenuBtn($editBtn, {
+			onOptionSelect: $.proxy(this, 'onFieldOptionSelect')
+		});
+	},
+
+	onFieldOptionSelect: function (option) {
+		var $option = $(option),
+			$field = $option.data('menu').$anchor.parent(),
+			action = $option.data('action');
+
+		switch (action) {
+			case 'edit': {
+				window.Out.edit($field[0]);
+				break;
+			}
+			case 'remove': {
+				this.removeField($field);
+				break;
+			}
+		}
+	},
+
+});
+
+Craft.FieldLayoutDesigner.BaseDrag = out_BaseDrag;
+Craft.FieldLayoutDesigner.TabDrag = out_TabDrag;
+Craft.FieldLayoutDesigner.FieldDrag = out_FieldDrag;
+
+Out.init({{ fields|json_encode|raw }});
+{% endjs %}
 
 {% block content %}
 	<input type="hidden" name="action" value="out/out/save">
@@ -94,13 +139,15 @@
 				fieldLayout: craft.app.fields.getLayoutByType('out\\elements\\Export')
 			} only %}
 		</div>
+
+		{# TODO: Pre-fill w/ previous value #}
+		<input type="hidden" name="fieldSettings" id="fieldSettings" value="{}">
 	</div>
 
 {% endblock %}
 
 {% block details %}
 	<div id="settings" class="meta">
-
 		{{ forms.selectField({
 			label: 'Element Type'|t('app'),
 			id: 'elementType',
@@ -108,7 +155,39 @@
 			options: elementTypes
 		}) }}
 
-		{#{{ forms.dateField({
+		{% for type, sources in elementSources %}
+			{% set config = {
+				label: 'Element Source',
+				id: 'elementSource-' ~ type|replace('\\', '_'),
+				name: 'elementSource',
+				options: sources,
+			} %}
+			{% embed '_includes/forms/field' with config|merge({
+				input: forms.select(config)
+			}) %}
+				{% block attr -%}
+					data-source-type="{{ type }}"
+					{%- if not loop.first %} style="display:none"{% endif -%}
+				{%- endblock %}
+			{% endembed %}
+		{% endfor %}
+
+		{{ forms.textField({
+			label: 'Search Query',
+			id: 'searchQuery',
+			name: 'searchQuery',
+		}) }}
+
+		{{ forms.textField({
+			label: 'Limit',
+			id: 'limit',
+			name: 'limit',
+			type: 'number',
+			min: 1,
+			placeholder: 'Unlimited',
+		}) }}
+
+		{{ forms.dateField({
 			label: 'Start Date',
 			id: 'startDate',
 			name: 'startDate',
@@ -118,64 +197,8 @@
 			label: 'End Date',
 			id: 'endDate',
 			name: 'endDate',
-		}) }}#}
+		}) }}
 	</div>
-
-	<hr>
-
-	{% for key, fields in elementTypeQueries %}
-		<div data-fields="{{ key }}" {% if not loop.first %} style="display:none"{% endif %} class="meta">
-			{% for field in fields %}
-				{% switch field.type %}
-				{% case 'string' %}
-					{{ forms.textField({
-						label: field.label,
-						id: field.handle,
-						name: 'outFilter[' ~ key ~ '][' ~ field.handle ~ ']',
-					}) }}
-				{% case 'boolean' %}
-					{{ forms.lightswitchField({
-						label: field.label,
-						id: field.handle,
-						name: 'outFilter[' ~ key ~ '][' ~ field.handle ~ ']',
-					}) }}
-				{% case 'date' %}
-					{{ forms.dateField({
-						label: field.label,
-						id: field.handle,
-						name: 'outFilter[' ~ key ~ '][' ~ field.handle ~ ']',
-					}) }}
-				{% default %}
-					Unknown type "{{ field.type }}" for "{{ field.handle }}"
-				{% endswitch %}
-			{% endfor %}
-		</div>
-	{% endfor %}
-
-	<script>
-		!function () {
-			const prevLoad = window.onload;
-			window.onload = function () {
-				prevLoad && prevLoad();
-
-				const fieldFields = document.querySelectorAll("[data-fields]");
-				const fieldsByType = {};
-
-				for (let i = 0, l = fieldFields.length; i < l; ++i) {
-					const f = fieldFields[i];
-					fieldsByType[f.dataset.fields] = f;
-				}
-
-				let currentActive = fieldFields[0];
-
-				document.getElementById("elementType").addEventListener("change", e => {
-					currentActive.style.display = "none";
-					currentActive = fieldsByType[e.target.value];
-					currentActive.style.display = "block";
-				});
-			};
-		}();
-	</script>
 
 	{% if export.id %}
 		<div class="meta read-only">

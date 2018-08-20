@@ -36,13 +36,13 @@ class ExportQuery extends ElementQuery
 		// join in the products table
 		$this->joinElementTable('out_exports');
 
-		// select the $this->elementType column
-		$this->query->select(['out_exports.$this->elementType']);
+		// select the elementType column
+		$this->query->select(['out_exports.elementType']);
 
 		if ($this->elementType)
 		{
 			$this->subQuery->andWhere(
-				Db::parseParam('products.$this->elementType', $this->elementType)
+				Db::parseParam('products.elementType', $this->elementType)
 			);
 		}
 

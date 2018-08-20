@@ -9,9 +9,11 @@
 namespace ether\out\controllers;
 
 use craft\base\Element;
+use craft\base\Field;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use ether\out\elements\Export;
+use ether\out\web\assets\OutAsset;
 
 
 /**
@@ -63,6 +65,10 @@ class OutController extends Controller
 		'relatedTo',
 	];
 
+	/**
+	 * @return \yii\web\Response
+	 * @throws \yii\base\InvalidConfigException
+	 */
 	public function actionEdit ()
 	{
 		$craft = \Craft::$app;
@@ -76,12 +82,12 @@ class OutController extends Controller
 		$variables['crumbs'] = [
 			[
 				'label' => 'Out',
-				'url' => UrlHelper::cpUrl('out')
-			]
+				'url' => UrlHelper::cpUrl('out'),
+			],
 		];
 
 		// Element Types
-		$variables['elementTypeQueries'] = [];
+		$variables['elementSources'] = [];
 		$variables['elementTypes'] = [];
 
 		foreach ($craft->elements->getAllElementTypes() as $el)
@@ -89,52 +95,43 @@ class OutController extends Controller
 			/** @var Element $type */
 			$type = new $el;
 
-			$queryClass = (new \ReflectionClass($el::find()))->name;
-			$query      = new $queryClass($el);
+			$sources = [];
 
-			$fields = array_filter(
-				array_keys(get_object_vars($query)),
-				function ($field) {
-					return !in_array($field, OutController::QUERY_IGNORE);
-				}
-			);
+			foreach ($type->sources() as $source)
+			{
+				if (
+					!array_key_exists('key', $source)
+					|| !array_key_exists('label', $source)
+				) continue;
 
-			sort($fields);
-
-			$queryFields = [];
-			foreach ($fields as $field) {
-				$t = gettype($query->$field);
-				$t = $t === 'NULL' ? 'string' : $t;
-
-				if (strpos(strtolower($field), 'date') !== false)
-					$t = 'date';
-
-				$label = preg_replace_callback(
-					'/([A-Z])/',
-					function ($c) {
-						return ' ' . $c[1];
-					},
-					$field
-				);
-				$label[0] = strtoupper($label[0]);
-
-				$queryFields[] = [
-					'handle' => $field,
-					'label' => $label,
-					'type' => $t,
+				$sources[] = [
+					'label' => $source['label'],
+					'value' => $source['key'],
 				];
 			}
 
-			$variables['elementTypeQueries'][$el] = $queryFields;
+			if (empty($sources))
+				continue;
+
+			$variables['elementSources'][$el] = $sources;
 
 			$variables['elementTypes'][] = [
-				'label' => $type->displayName() ?: $el,
-				'value' => $el,
+				'label'   => $type->displayName() ?: $el,
+				'value'   => $el,
 			];
 		}
 
 		// Fields
-		$variables['fields'] = $craft->fields->getAllFields();
+		$fields = [];
+
+		/** @var Field $field */
+		foreach ($craft->fields->getAllFields() as $field)
+			$fields[$field->id] = $field->handle;
+
+		$variables['fields'] = $fields;
+
+		// Asset
+		$craft->view->registerAssetBundle(OutAsset::class);
 
 		return $this->renderTemplate(
 			'out/_edit',
@@ -142,6 +139,12 @@ class OutController extends Controller
 		);
 	}
 
+	/**
+	 * @throws \Throwable
+	 * @throws \craft\errors\ElementNotFoundException
+	 * @throws \yii\base\Exception
+	 * @throws \yii\web\BadRequestHttpException
+	 */
 	public function actionSave ()
 	{
 		$fieldLayout = \Craft::$app->getFields()->assembleLayoutFromPost();
