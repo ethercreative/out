@@ -14,6 +14,8 @@ use craft\helpers\Json;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
 use ether\out\elements\db\ExportQuery;
+use ether\out\Out;
+use yii\helpers\Inflector;
 
 
 /**
@@ -167,10 +169,12 @@ class Export extends Element
 
 	public static function sources (string $context = null): array
 	{
+		$name = Inflector::pluralize(Out::getInstance()->getSettings()->exportName);
+
 		return [
 			'*' => [
 				'key'   => '*',
-				'label' => \Craft::t('out', 'All Exports'),
+				'label' => 'All ' . $name,
 			],
 		];
 	}

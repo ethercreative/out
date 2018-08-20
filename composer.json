@@ -12,7 +12,7 @@
     "export"
   ],
   "support": {
-    "docs": "https://github.com/ethercreative/out/blob/master/README.md",
+    "docs": "https://github.com/ethercreative/out/blob/v3/README.md",
     "issues": "https://github.com/ethercreative/out/issues"
   },
   "license": "proprietary",
@@ -33,7 +33,7 @@
   "extra": {
     "name": "Out",
     "handle": "out",
-    "changelogUrl": "https://raw.githubusercontent.com/ethercreative/out/master/CHANGELOG.md",
+    "changelogUrl": "https://raw.githubusercontent.com/ethercreative/out/v3/CHANGELOG.md",
     "class": "ether\\out\\Out"
   }
 }

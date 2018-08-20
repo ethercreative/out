@@ -1,0 +1,17 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+	first: true,
+	label: "Plugin Name",
+	name: 'pluginName',
+	value: settings.pluginName,
+	instructions: 'Visually change the name of the plugin',
+}) }}
+
+{{ forms.textField({
+	first: true,
+	label: "Export Name",
+	name: 'exportName',
+	value: settings.exportName,
+	instructions: 'Visually change the name of the exports. This should be singular.',
+}) }}

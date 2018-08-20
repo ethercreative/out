@@ -9,7 +9,6 @@
 namespace ether\out\controllers;
 
 use craft\base\Element;
-use craft\base\Field;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
@@ -29,6 +28,14 @@ use yii\web\HttpException;
  */
 class OutController extends Controller
 {
+
+	public function actionIndex ()
+	{
+		return $this->renderTemplate('out/index', [
+			'pluginName' => Out::getInstance()->getSettings()->pluginName,
+			'exportName' => Out::getInstance()->getSettings()->exportName,
+		]);
+	}
 
 	/**
 	 * @param string|null $exportId
@@ -57,7 +64,7 @@ class OutController extends Controller
 		// Breadcrumbs
 		$variables['crumbs'] = [
 			[
-				'label' => 'Out',
+				'label' => Out::getInstance()->getSettings()->pluginName,
 				'url' => UrlHelper::cpUrl('out'),
 			],
 		];

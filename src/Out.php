@@ -11,6 +11,7 @@ namespace ether\out;
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
 use craft\web\UrlManager;
+use ether\out\models\Settings;
 use ether\out\services\OutService;
 use yii\base\Event;
 
@@ -29,7 +30,7 @@ class Out extends Plugin
 	// =========================================================================
 
 	public $schemaVersion = '1.0.0';
-	public $hasCpSettings = false;
+	public $hasCpSettings = true;
 	public $hasCpSection  = true;
 
 	// Initialize
@@ -58,9 +59,43 @@ class Out extends Plugin
 
 	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
 	{
+		$event->rules['out'] = 'out/out/index';
 		$event->rules['out/new'] = 'out/out/edit';
 		$event->rules['out/<exportId:\d+>'] = 'out/out/edit';
 		$event->rules['out/dl/<exportId:\d+>'] = 'out/out/dl';
+	}
+
+	// Craft
+	// =========================================================================
+
+	public function getCpNavItem ()
+	{
+		$item = parent::getCpNavItem();
+
+		$item['label'] = $this->getSettings()->pluginName;
+
+		return $item;
+	}
+
+	// Settings
+	// -------------------------------------------------------------------------
+
+	protected function createSettingsModel ()
+	{
+		return new Settings();
+	}
+
+	/**
+	 * @return null|string
+	 * @throws \Twig_Error_Loader
+	 * @throws \yii\base\Exception
+	 */
+	protected function settingsHtml ()
+	{
+		return \Craft::$app->getView()->renderTemplate(
+			'out/settings', [
+			'settings' => $this->getSettings()
+		]);
 	}
 
 }
