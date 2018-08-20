@@ -10,6 +10,8 @@ namespace ether\out;
 
 use craft\base\Plugin;
 use craft\events\RegisterUrlRulesEvent;
+use craft\events\RegisterUserPermissionsEvent;
+use craft\services\UserPermissions;
 use craft\web\UrlManager;
 use ether\out\models\Settings;
 use ether\out\services\OutService;
@@ -52,6 +54,12 @@ class Out extends Plugin
 			UrlManager::EVENT_REGISTER_CP_URL_RULES,
 			[$this, 'onRegisterCpUrlRules']
 		);
+
+		Event::on(
+			UserPermissions::class,
+			UserPermissions::EVENT_REGISTER_PERMISSIONS,
+			[$this, 'onRegisterUserPermissions']
+		);
 	}
 
 	// Events
@@ -59,10 +67,31 @@ class Out extends Plugin
 
 	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
 	{
-		$event->rules['out'] = 'out/out/index';
-		$event->rules['out/new'] = 'out/out/edit';
-		$event->rules['out/<exportId:\d+>'] = 'out/out/edit';
-		$event->rules['out/dl/<exportId:\d+>'] = 'out/out/dl';
+		$user = \Craft::$app->user;
+
+		if ($user->can('accessOut') || $user->getIsAdmin())
+			$event->rules['out'] = 'out/out/index';
+
+		// TODO: Add permission for downloading only
+
+		if ($user->can('out_createExport') || $user->getIsAdmin())
+		{
+			$event->rules['out/new']               = 'out/out/edit';
+			$event->rules['out/<exportId:\d+>']    = 'out/out/edit';
+			$event->rules['out/dl/<exportId:\d+>'] = 'out/out/dl';
+		}
+	}
+
+	public function onRegisterUserPermissions (RegisterUserPermissionsEvent $event)
+	{
+		$event->permissions['Out'] = [
+			'accessOut' => [
+				'label' => 'Access Out',
+			],
+			'out_createExport' => [
+				'label' => 'Create Exports',
+			],
+		];
 	}
 
 	// Craft
@@ -70,6 +99,10 @@ class Out extends Plugin
 
 	public function getCpNavItem ()
 	{
+		$user = \Craft::$app->user;
+		if (!$user->can('accessOut') && !$user->getIsAdmin())
+			return null;
+
 		$item = parent::getCpNavItem();
 
 		$item['label'] = $this->getSettings()->pluginName;
