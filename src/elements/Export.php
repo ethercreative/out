@@ -114,7 +114,10 @@ class Export extends Element
 
 	public function getCpEditUrl (): string
 	{
-		return UrlHelper::cpUrl('out/' . $this->id);
+		if (self::_canCreate())
+			return UrlHelper::cpUrl('out/' . $this->id);
+
+		return '';
 	}
 
 	public function getFieldLayout ()
@@ -127,12 +130,16 @@ class Export extends Element
 
 	protected static function defineTableAttributes (): array
 	{
-		return [
-			'title' => ['label' => \Craft::t('app', 'Title')],
+		$attrs = [
+			'title'       => ['label' => \Craft::t('app', 'Title')],
 			'dateCreated' => ['label' => \Craft::t('app', 'Date Created')],
 			'dateUpdated' => ['label' => \Craft::t('app', 'Date Updated')],
-			'dl' => ['label' => 'Download'],
 		];
+
+		if (self::_canDownload())
+			$attrs['dl'] = ['label' => 'Download'];
+
+		return $attrs;
 	}
 
 	protected static function defineDefaultTableAttributes (string $source): array
@@ -142,14 +149,16 @@ class Export extends Element
 		$attrs[] = 'title';
 		$attrs[] = 'dateCreated';
 		$attrs[] = 'dateUpdated';
-		$attrs[] = 'dl';
+
+		if (self::_canDownload())
+			$attrs[] = 'dl';
 
 		return $attrs;
 	}
 
 	protected function tableAttributeHtml (string $attribute): string
 	{
-		if ($attribute === 'dl')
+		if ($attribute === 'dl' && self::_canDownload())
 		{
 			$dl = UrlHelper::cpUrl('out/dl/' . $this->id);
 			return "<a href='{$dl}' title='Download'><svg height=\"19px\" version=\"1.1\" viewBox=\"0 0 14 19\" width=\"14px\" xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"none\" fill-rule=\"evenodd\" stroke=\"none\" stroke-width=\"1\"><g fill=\"#0d78f2\" transform=\"translate(-383.000000, -213.000000)\"><g transform=\"translate(383.000000, 213.500000)\"><path d=\"M14,6 L10,6 L10,0 L4,0 L4,6 L0,6 L7,13 L14,6 L14,6 Z M0,15 L0,17 L14,17 L14,15 L0,15 L0,15 Z\" /></g></g></g></svg></a>";
@@ -211,6 +220,23 @@ class Export extends Element
 			'endDate'       => $this->endDate,
 			'fieldSettings' => $this->fieldSettings,
 		];
+	}
+
+	private static function _canCreate ()
+	{
+		return (
+			\Craft::$app->user->can('out_createExport')
+			|| \Craft::$app->user->getIsAdmin()
+		);
+	}
+
+	private static function _canDownload ()
+	{
+		return (
+			\Craft::$app->user->can('out_createExport')
+			|| \Craft::$app->user->can('out_downloadExport')
+			|| \Craft::$app->user->getIsAdmin()
+		);
 	}
 
 }

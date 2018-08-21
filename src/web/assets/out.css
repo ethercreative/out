@@ -1,2 +1,2 @@
-.out--fields li{display:-ms-flexbox;display:flex;-ms-flex-pack:justify;justify-content:space-between;padding:7px 0}.out--fields li:not(:last-child){border-bottom:1px solid #eee}.out--modal{height:auto!important;min-width:0!important;min-height:0!important;max-width:500px}.out--modal button{font-size:100%}
+.out--fields button{color:rgba(0,0,0,.2);font-size:100%;-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer}.out--fields button:hover{color:#0d78f2}.out--fields small{color:#8f98a3}.out--modal{height:auto!important;min-width:0!important;min-height:0!important;max-width:500px}.out--modal button{font-size:100%}
 /*# sourceMappingURL=out.css.map */

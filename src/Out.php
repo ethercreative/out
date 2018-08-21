@@ -72,12 +72,17 @@ class Out extends Plugin
 		if ($user->can('accessOut') || $user->getIsAdmin())
 			$event->rules['out'] = 'out/out/index';
 
-		// TODO: Add permission for downloading only
-
 		if ($user->can('out_createExport') || $user->getIsAdmin())
 		{
 			$event->rules['out/new']               = 'out/out/edit';
 			$event->rules['out/<exportId:\d+>']    = 'out/out/edit';
+		}
+
+		if (
+			$user->can('out_createExport')
+			|| $user->can('out_downloadExport')
+			|| $user->getIsAdmin()
+		) {
 			$event->rules['out/dl/<exportId:\d+>'] = 'out/out/dl';
 		}
 	}
@@ -90,6 +95,9 @@ class Out extends Plugin
 			],
 			'out_createExport' => [
 				'label' => 'Create Exports',
+			],
+			'out_downloadExport' => [
+				'label' => 'Download Exports',
 			],
 		];
 	}

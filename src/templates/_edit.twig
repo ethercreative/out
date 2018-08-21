@@ -90,17 +90,31 @@ Out.init({{ fields|json_encode|raw }});
 			errors: export.getErrors('title'),
 		}) }}
 
-		<ul class="out--fields" id="outFields">
+		<table class="data fullwidth out--fields" id="outFields">
+			<thead>
+			<tr>
+				<th>Column</th>
+				<th class="thin checkbox-cell"></th>
+			</tr>
+			</thead>
+			<tbody>
 			{% for key, field in fields %}
-				<li>
-					{{ field.name }}
-
-					<button type="button" data-key="{{ key }}">
-						Settings
-					</button>
-				</li>
+				<tr>
+					<td>
+						{% if key in export.fieldSettings|keys and export.fieldSettings[key].heading != field.name %}
+							{{ export.fieldSettings[key].heading }}
+							<small>({{ field.name }})</small>
+						{% else %}
+							{{ field.name }}
+						{% endif %}
+					</td>
+					<td class="thin action">
+						<button type="button" data-key="{{ key }}" class="settings icon" title="Edit"></button>
+					</td>
+				</tr>
 			{% endfor %}
-		</ul>
+			</tbody>
+		</table>
 
 		<input type="hidden" name="fieldSettings" id="fieldSettings" value="{{ export.fieldSettings|json_encode }}">
 	</div>
