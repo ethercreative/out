@@ -126,12 +126,14 @@ new Out();
 
 {% block details %}
 	<div id="settings" class="meta">
-		<div class="field out--warning">
-			<p class="warning">
-				Changing Element Type or Element Source
-				may cause some columns to no longer work.
-			</p>
-		</div>
+		{% if not isNewExport %}
+			<div class="field out--warning">
+				<p class="warning">
+					Changing Element Type or Element Source
+					may cause some columns to no longer work.
+				</p>
+			</div>
+		{% endif %}
 
 		{{ forms.selectField({
 			label: 'Element Type'|t('app'),
