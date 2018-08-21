@@ -1,12 +1,6 @@
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
-{# Temp #}
-{% set continueEditingUrl = "" %}
-{% set nextExportUrl = "" %}
-{% set isNewExport = false %}
-{# End Temp #}
-
 {% set title = export.id ? export.title : 'New Export' %}
 {% set fullPageForm = true %}
 {% set saveShortcutRedirect = continueEditingUrl %}
@@ -23,7 +17,7 @@
 
 		<div class="btn submit menubtn"></div>
 		<div class="menu">
-			{#<ul>
+			<ul>
 				<li>
 					<a class="formsubmit"
 				       data-redirect="{{ continueEditingUrl|hash }}">
@@ -38,7 +32,7 @@
 					</a>
 				</li>
 
-				{% if not isNewExport %}
+				{#{% if not isNewExport %}
 					<li>
 						<a class="formsubmit" data-param="duplicate"
 					       data-value="1"
@@ -46,8 +40,8 @@
 							{{ "Save as a new export"|t('app') }}
 						</a>
 					</li>
-				{% endif %}
-			</ul>#}
+				{% endif %}#}
+			</ul>
 			{% if not isNewExport %}
 				{#<hr>#}
 				<ul>

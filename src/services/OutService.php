@@ -73,6 +73,7 @@ class OutService extends Component
 		/** @var Element $element */
 		$element = new $export->elementType;
 
+		// Build the criteria
 		$criteria = [];
 
 		foreach ($element->sources() as $source)
@@ -106,6 +107,7 @@ class OutService extends Component
 		// TODO: If $query->count() is greater than X, split into multiple files and zip
 		\Craft::configure($query, $criteria);
 
+		// Get the fields
 		$this->_fields = $this->fields();
 		$integrations = Integrations::fields();
 		if (array_key_exists($export->elementType, $integrations))
@@ -115,16 +117,20 @@ class OutService extends Component
 				$this->_fields = $integrations[$export->elementType]($query->one());
 		}
 
+		// Start CSV output
 		ob_start();
 
 		$out = fopen('php://output', 'w');
 
+		// Output header
 		fputcsv($out, $this->_header($export));
 
+		// Output elements
 		/** @var Element $item */
 		foreach ($query->all() as $item)
 			fputcsv($out, $this->_row($export, $item));
 
+		// End CSV output
 		fclose($out);
 
 		$out = ob_get_clean();

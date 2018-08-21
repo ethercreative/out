@@ -17,6 +17,7 @@ use ether\out\base\Integrations;
 use ether\out\elements\Export;
 use ether\out\Out;
 use ether\out\web\assets\OutAsset;
+use FontLib\Table\Type\name;
 use yii\web\HttpException;
 
 
@@ -49,7 +50,11 @@ class OutController extends Controller
 	{
 		$craft = \Craft::$app;
 
-		$variables = [];
+		$variables = [
+			'continueEditingUrl' => 'out/{id}',
+			'nextExportUrl' => 'out/new',
+			'isNewExport' => $exportId === null,
+		];
 
 		// Export
 		if ($exportId)
@@ -156,21 +161,18 @@ class OutController extends Controller
 		$export->endDate = DateTimeHelper::toDateTime($request->getParam('endDate')) ?: null;
 		$export->fieldSettings = $request->getParam('fieldSettings');
 
-		if (!\Craft::$app->elements->saveElement($export))
-		{
-			\Craft::$app->getSession()->setError(
-				\Craft::t('out', 'Couldn’t save export.')
-			);
+		if (\Craft::$app->elements->saveElement($export))
+			return $this->redirectToPostedUrl($export);
 
+		\Craft::$app->getSession()->setError(
+			\Craft::t('out', 'Couldn’t save export.')
+		);
 
-			\Craft::$app->getUrlManager()->setRouteParams([
-				'export' => $export
-			]);
+		\Craft::$app->getUrlManager()->setRouteParams([
+			'export' => $export
+		]);
 
-			return null;
-		}
-
-		$this->redirect($export->getCpEditUrl());
+		return null;
 	}
 
 	/**

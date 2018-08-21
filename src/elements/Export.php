@@ -104,7 +104,7 @@ class Export extends Element
 			)->execute();
 		}
 
-		parent::afterSave($isNew);
+		return parent::afterSave($isNew);
 	}
 
 	public static function find (): ElementQueryInterface
