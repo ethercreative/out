@@ -11,11 +11,11 @@
   "js": {
     "ignore": false,
     "input": [
-      "resources/js/out.js",
+      "resources/js/OutEdit.js",
       "resources/js/OutIndex.js"
     ],
     "output": [
-      "src/web/assets/out.min.js",
+      "src/web/assets/OutEdit.min.js",
       "src/web/assets/OutIndex.min.js"
     ],
     "watch": [

@@ -3,6 +3,7 @@
 namespace ether\out\web\assets;
 
 use craft\web\AssetBundle;
+use craft\web\assets\cp\CpAsset;
 
 class OutAsset extends AssetBundle
 {
@@ -11,8 +12,12 @@ class OutAsset extends AssetBundle
 	{
 		$this->sourcePath = __DIR__;
 
+		$this->depends = [
+			CpAsset::class,
+		];
+
 		$this->js = [
-			'out.min.js',
+			'OutEdit.min.js',
 		];
 
 		$this->css = [

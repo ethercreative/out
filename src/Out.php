@@ -17,7 +17,6 @@ use craft\services\UserPermissions;
 use craft\web\UrlManager;
 use ether\out\base\Integrations;
 use ether\out\elements\Export;
-use ether\out\integrations\SproutFormsIntegration;
 use ether\out\models\Settings;
 use ether\out\services\OutService;
 use yii\base\Event;

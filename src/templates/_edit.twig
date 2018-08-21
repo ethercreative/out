@@ -60,7 +60,8 @@
 {% endblock %}
 
 {% js %}
-Out.init({{ fields|json_encode|raw }}, {{ integrations|json_encode|raw }});
+// Out.init({{ fields|json_encode|raw }}, {{ integrations|json_encode|raw }});
+new Out();
 {% endjs %}
 
 {% block content %}
@@ -138,7 +139,9 @@ Out.init({{ fields|json_encode|raw }}, {{ integrations|json_encode|raw }});
 			}) %}
 				{% block attr -%}
 					data-source-type="{{ type }}"
-					{%- if not loop.first %} style="display:none"{% endif -%}
+					{%- if export.elementType != type or (not export.elementType and not loop.first) -%}
+						{##} style="display:none"
+					{%- endif -%}
 				{%- endblock %}
 			{% endembed %}
 		{% endfor %}
