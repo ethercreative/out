@@ -143,7 +143,7 @@ class OutService extends BaseApplicationComponent
 				$row[] = craft()->templates->renderString(
 					$col["twig"],
 					[
-						$col['handle'] => $entry->getContent()->{$col['handle']},
+						$col['handle'] => $entry->{$col['handle']},
 					]
 				);
 			}
