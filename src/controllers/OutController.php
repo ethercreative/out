@@ -13,6 +13,7 @@ use craft\helpers\DateTimeHelper;
 use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
+use ether\out\base\Integrations;
 use ether\out\elements\Export;
 use ether\out\Out;
 use ether\out\web\assets\OutAsset;
@@ -75,6 +76,9 @@ class OutController extends Controller
 
 		foreach ($craft->elements->getAllElementTypes() as $el)
 		{
+			if ($el === Export::class)
+				continue;
+
 			/** @var Element $type */
 			$type = new $el;
 
@@ -99,13 +103,16 @@ class OutController extends Controller
 			$variables['elementSources'][$el] = $sources;
 
 			$variables['elementTypes'][] = [
-				'label'   => $type->displayName() ?: $el,
-				'value'   => $el,
+				'label' => $type->displayName() ?: $el,
+				'value' => $el,
 			];
 		}
 
 		// Fields
 		$variables['fields'] = Out::getInstance()->out->fields();
+
+		// Integrations
+		$variables['integrations'] = Integrations::fields();
 
 		// Asset
 		$craft->view->registerAssetBundle(OutAsset::class);

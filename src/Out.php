@@ -9,10 +9,15 @@
 namespace ether\out;
 
 use craft\base\Plugin;
+use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
+use craft\services\Elements;
 use craft\services\UserPermissions;
 use craft\web\UrlManager;
+use ether\out\base\Integrations;
+use ether\out\elements\Export;
+use ether\out\integrations\SproutFormsIntegration;
 use ether\out\models\Settings;
 use ether\out\services\OutService;
 use yii\base\Event;
@@ -60,6 +65,20 @@ class Out extends Plugin
 			UserPermissions::EVENT_REGISTER_PERMISSIONS,
 			[$this, 'onRegisterUserPermissions']
 		);
+
+		Event::on(
+			Elements::class,
+			Elements::EVENT_REGISTER_ELEMENT_TYPES,
+			[$this, 'onRegisterElementTypes']
+		);
+
+		// Integrations
+		// ---------------------------------------------------------------------
+
+		$request = \Craft::$app->request;
+		if ($request->isCpRequest && strpos($request->url, 'out') !== false)
+			Integrations::register();
+
 	}
 
 	// Events
@@ -100,6 +119,11 @@ class Out extends Plugin
 				'label' => 'Download Exports',
 			],
 		];
+	}
+
+	public function onRegisterElementTypes (RegisterComponentTypesEvent $event)
+	{
+		$event->types[] = Export::class;
 	}
 
 	// Craft
