@@ -15,3 +15,12 @@
 	value: settings.exportName,
 	instructions: 'Visually change the name of the exports. This should be singular.',
 }) }}
+
+{{ forms.textField({
+	first: true,
+	label: "Rows Per-file",
+	name: 'split',
+	type: 'number',
+	value: settings.split,
+	instructions: 'Split into multiple files every X rows',
+}) }}

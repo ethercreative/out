@@ -210,17 +210,7 @@ class OutController extends Controller
 
 		if (!$export) throw new HttpException(404);
 
-		$filename = StringHelper::toKebabCase($export->title);
-
-		$csv = Out::getInstance()->out->generate($export, $siteId);
-
-		header("Content-Type: application/csv");
-		header("Content-Disposition: attachment; filename={$filename}.csv");
-		header("Pragma: no-cache");
-
-		echo $csv;
-
-		\Craft::$app->end();
+		Out::getInstance()->out->generate($export, $siteId);
 	}
 
 	/**

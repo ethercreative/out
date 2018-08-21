@@ -5,8 +5,12 @@ namespace ether\out\services;
 use craft\base\Component;
 use craft\base\Element;
 use craft\base\Field;
+use craft\elements\db\ElementQuery;
+use craft\helpers\StringHelper;
 use ether\out\base\Integrations;
 use ether\out\elements\Export;
+use ether\out\Out;
+use ZipArchive;
 
 class OutService extends Component
 {
@@ -68,6 +72,12 @@ class OutService extends Component
 		return $integrations[$element]($firstElement);
 	}
 
+	/**
+	 * @param Export $export
+	 * @param int    $siteId
+	 *
+	 * @throws \yii\base\ExitException
+	 */
 	public function generate (Export $export, int $siteId)
 	{
 		/** @var Element $element */
@@ -102,9 +112,9 @@ class OutService extends Component
 		if (!empty($export->endDate))
 			$criteria['before'] = $export->endDate;
 
+		/** @var ElementQuery $query */
 		$query = $element::find()->siteId($siteId);
 
-		// TODO: If $query->count() is greater than X, split into multiple files and zip
 		\Craft::configure($query, $criteria);
 
 		// Get the fields
@@ -117,7 +127,64 @@ class OutService extends Component
 				$this->_fields = $integrations[$export->elementType]($query->one());
 		}
 
-		// Start CSV output
+		$split = Out::getInstance()->getSettings()['split'];
+
+		if ($query->count() > $split)
+			$this->_renderMultiple($export, $query, $split);
+		else
+			$this->_renderSingle($export, $query);
+	}
+
+	/**
+	 * @param              $export
+	 * @param ElementQuery $query
+	 *
+	 * @throws \yii\base\ExitException
+	 */
+	private function _renderSingle ($export, ElementQuery $query)
+	{
+		$filename = StringHelper::toKebabCase($export->title);
+
+		header("Content-Type: application/csv");
+		header("Content-Disposition: attachment; filename={$filename}.csv");
+		header("Pragma: no-cache");
+
+		echo $this->_renderCsv($export, $query);
+
+		\Craft::$app->end();
+	}
+
+	private function _renderMultiple ($export, ElementQuery $query, $split)
+	{
+		$count = $query->count();
+		$pages = ceil($count / $split);
+
+		$filename = StringHelper::toKebabCase($export->title);
+
+
+		$file = @tempnam("tmp", "zip");
+		$zip = new ZipArchive();
+		$zip->open($file, ZipArchive::CREATE);
+
+		while ($pages--)
+		{
+			$zip->addFromString(
+				$filename . '.' . ($pages + 1) . '.csv',
+				$this->_renderCsv($export, clone $query, $split * $pages, $split)
+			);
+		}
+
+		$zip->close();
+
+		header('Content-Type: application/zip');
+		header('Content-Length: ' . filesize($file));
+		header('Content-Disposition: attachment; filename="' . $filename . '.zip"');
+		readfile($file);
+		unlink($file);
+	}
+
+	private function _renderCsv ($export, ElementQuery $query, $offset = 0, $limit = null)
+	{
 		ob_start();
 
 		$out = fopen('php://output', 'w');
@@ -127,7 +194,7 @@ class OutService extends Component
 
 		// Output elements
 		/** @var Element $item */
-		foreach ($query->all() as $item)
+		foreach ($query->limit($limit)->offset($offset)->all() as $item)
 			fputcsv($out, $this->_row($export, $item));
 
 		// End CSV output
