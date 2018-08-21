@@ -68,7 +68,7 @@ class OutService extends Component
 		return $integrations[$element]($firstElement);
 	}
 
-	public function generate (Export $export)
+	public function generate (Export $export, int $siteId)
 	{
 		/** @var Element $element */
 		$element = new $export->elementType;
@@ -102,7 +102,7 @@ class OutService extends Component
 		if (!empty($export->endDate))
 			$criteria['before'] = $export->endDate;
 
-		$query = $element::find();
+		$query = $element::find()->siteId($siteId);
 
 		// TODO: If $query->count() is greater than X, split into multiple files and zip
 		\Craft::configure($query, $criteria);

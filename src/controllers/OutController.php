@@ -17,7 +17,7 @@ use ether\out\base\Integrations;
 use ether\out\elements\Export;
 use ether\out\Out;
 use ether\out\web\assets\OutAsset;
-use FontLib\Table\Type\name;
+use ether\out\web\assets\OutIndexAsset;
 use yii\web\HttpException;
 
 
@@ -31,8 +31,14 @@ use yii\web\HttpException;
 class OutController extends Controller
 {
 
+	/**
+	 * @return \yii\web\Response
+	 * @throws \yii\base\InvalidConfigException
+	 */
 	public function actionIndex ()
 	{
+		\Craft::$app->view->registerAssetBundle(OutIndexAsset::class);
+
 		return $this->renderTemplate('out/index', [
 			'pluginName' => Out::getInstance()->getSettings()->pluginName,
 			'exportName' => Out::getInstance()->getSettings()->exportName,
@@ -197,11 +203,16 @@ class OutController extends Controller
 	{
 		/** @var Export $export */
 		$export = Export::find()->id($exportId)->one();
+		$siteId = \Craft::$app->request->getParam(
+			'siteId',
+			\Craft::$app->sites->primarySite->id
+		);
+
 		if (!$export) throw new HttpException(404);
 
 		$filename = StringHelper::toKebabCase($export->title);
 
-		$csv = Out::getInstance()->out->generate($export);
+		$csv = Out::getInstance()->out->generate($export, $siteId);
 
 		header("Content-Type: application/csv");
 		header("Content-Disposition: attachment; filename={$filename}.csv");

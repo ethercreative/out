@@ -1,25 +1,31 @@
 {
-	"manifest": null,
-	"less": {
-		"ignore": false,
-		"input": "resources/less/out.less",
-		"output": "src/web/assets/out.css",
-		"watch": [
-			"resources/less/**/*"
-		]
-	},
-	"js": {
-		"ignore": false,
-		"input": "resources/js/out.js",
-		"output": "src/web/assets/out.min.js",
-		"watch": [
-			"resources/js/**/*.js"
-		]
-	},
-	"critical": {
-		"ignore": true
-	},
-	"browserSync": {
-		"ignore": true
-	}
+  "manifest": null,
+  "less": {
+    "ignore": false,
+    "input": "resources/less/out.less",
+    "output": "src/web/assets/out.css",
+    "watch": [
+      "resources/less/**/*"
+    ]
+  },
+  "js": {
+    "ignore": false,
+    "input": [
+      "resources/js/out.js",
+      "resources/js/OutIndex.js"
+    ],
+    "output": [
+      "src/web/assets/out.min.js",
+      "src/web/assets/OutIndex.min.js"
+    ],
+    "watch": [
+      "resources/js/**/*.js"
+    ]
+  },
+  "critical": {
+    "ignore": true
+  },
+  "browserSync": {
+    "ignore": true
+  }
 }
