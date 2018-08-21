@@ -41,202 +41,203 @@ window.onload = function () {
 	});
 };
 
-{
-	const h = function (tag = "div", attributes = {}, children = []) {
-		const elem = document.createElement(tag);
+const h = function (tag = "div", attributes = {}, children = []) {
+	const elem = document.createElement(tag);
 
-		for (let [key, value] of Object.entries(attributes)) {
-			if (!value) continue;
+	for (let [key, value] of Object.entries(attributes)) {
+		if (!value) continue;
 
-			if (typeof value === "function") {
-				if (key === "ref") value(elem);
-				else elem.addEventListener(key, value);
-				continue;
-			}
-
-			if (key === "style")
-				value = value.replace(/[\t\r\n]/g, " ").trim();
-
-			elem.setAttribute(key, value);
+		if (typeof value === "function") {
+			if (key === "ref") value(elem);
+			else elem.addEventListener(key, value);
+			continue;
 		}
 
-		if (!Array.isArray(children))
-			children = [children];
+		if (key === "style")
+			value = value.replace(/[\t\r\n]/g, " ").trim();
 
-		children.forEach(child => {
-			if (!child) return;
+		elem.setAttribute(key, value);
+	}
 
-			try {
-				elem.appendChild(child);
-			} catch (_) {
-				elem.appendChild(document.createTextNode(child));
-			}
-		});
+	if (!Array.isArray(children))
+		children = [children];
 
-		return elem;
-	};
+	children.forEach(child => {
+		if (!child) return;
 
-	const f = function (config) {
-		return h("div", { class: "field" }, [
-			h("div", { class: "heading" }, [
-				h("label", { for: config.id }, config.label),
-				config.hasOwnProperty("instructions")
-					? h("div", { class: "instructions" }, h("p", {}, config.instructions))
-					: null
-			]),
-			h("div", { class: "input" }, [
-				h(config.tag, { id: config.id, ...config.attr }, config.children || null)
-			]),
-		]);
-	};
+		try {
+			elem.appendChild(child);
+		} catch (_) {
+			elem.appendChild(document.createTextNode(child));
+		}
+	});
 
-	window.Out = {
+	return elem;
+};
 
-		// Properties
-		// =====================================================================
+const f = function (config) {
+	return h("div", { class: "field" }, [
+		h("div", { class: "heading" }, [
+			h("label", { for: config.id }, config.label),
+			config.hasOwnProperty("instructions")
+				? h("div", { class: "instructions" }, h("p", {}, config.instructions))
+				: null
+		]),
+		h("div", { class: "input" }, [
+			h(config.tag, { id: config.id, ...config.attr }, config.children || null)
+		]),
+	]);
+};
 
-		fieldMap: {},
-		fields: {},
-		activeFieldId: null,
+window.Out = {
 
-		modal: null,
+	// Properties
+	// =====================================================================
 
-		headingInput: null,
-		twigInput: null,
-		escapeInput: null,
-		enabledInput: null,
+	fieldMap: {},
+	integrations: [],
 
-		fieldSettings: null,
+	fields: {},
+	activeFieldId: null,
 
-		// Functions
-		// =====================================================================
+	modal: null,
 
-		init (fieldMap) {
-			this.fieldMap = fieldMap;
+	headingInput: null,
+	twigInput: null,
+	escapeInput: null,
+	enabledInput: null,
 
-			this.fieldSettings = document.getElementById("fieldSettings");
-			this.fields = JSON.parse(this.fieldSettings.value);
-			if (Array.isArray(this.fields)) this.fields = {};
+	fieldSettings: null,
 
-			const btns = document.getElementById("outFields").getElementsByTagName("button");
-			for (let i = 0, l = btns.length; i < l; ++i)
-				btns[i].addEventListener("click", this.edit.bind(this));
+	// Functions
+	// =====================================================================
 
-			this.modal = new Garnish.Modal(
-				h("div", { class: "modal out--modal" }, [
-					h("div", { class: "body" }, [
-						f({
-							label: "Enabled",
-							id: "out_enabled",
-							tag: "input",
-							attr: {
-								type: "checkbox",
-								checked: false,
-								ref: el => { this.enabledInput = el; }
-							},
-						}),
-						f({
-							label: "Column Heading",
-							id: "out_columnHeading",
-							tag: "input",
-							attr: {
-								class: "text fullwidth",
-								ref: el => { this.headingInput = el; }
-							},
-						}),
-						f({
-							label: "Twig",
-							id: "out_twig",
-							tag: "textarea",
-							attr: {
-								rows: 5,
-								class: "text fullwidth",
-								ref: el => { this.twigInput = el; }
-							},
-							instructions: [
-								"Code to be executed in place of the fields output. You have access to the ",
-								h("code", {}, "element"),
-								" variable as well as all global & Craft variables.",
-							],
-						}),
-						f({
-							label: "Escape Value",
-							id: "out_escape",
-							tag: "input",
-							attr: {
-								type: "checkbox",
-								checked: true,
-								ref: el => { this.escapeInput = el; }
-							},
-							instructions: "If checked the output of the column will be escaped",
-						})
-					]),
-					h("div", { class: "footer" }, [
-						h("div", { class: "buttons right" }, [
-							h("button", {
-								class: "btn",
-								click: this.cancel.bind(this),
-							}, "Cancel"),
-							h("button", {
-								class: "btn submit",
-								click: this.update.bind(this),
-							}, "Update"),
-						]),
+	init (fieldMap, integrations) {
+		this.fieldMap = fieldMap;
+		this.integrations = integrations;
+
+		this.fieldSettings = document.getElementById("fieldSettings");
+		this.fields = JSON.parse(this.fieldSettings.value);
+		if (Array.isArray(this.fields)) this.fields = {};
+
+		const btns = document.getElementById("outFields").getElementsByTagName("button");
+		for (let i = 0, l = btns.length; i < l; ++i)
+			btns[i].addEventListener("click", this.edit.bind(this));
+
+		this.modal = new Garnish.Modal(
+			h("div", { class: "modal out--modal" }, [
+				h("div", { class: "body" }, [
+					f({
+						label: "Enabled",
+						id: "out_enabled",
+						tag: "input",
+						attr: {
+							type: "checkbox",
+							checked: false,
+							ref: el => { this.enabledInput = el; }
+						},
+					}),
+					f({
+						label: "Column Heading",
+						id: "out_columnHeading",
+						tag: "input",
+						attr: {
+							class: "text fullwidth",
+							ref: el => { this.headingInput = el; }
+						},
+					}),
+					f({
+						label: "Twig",
+						id: "out_twig",
+						tag: "textarea",
+						attr: {
+							rows: 5,
+							class: "text fullwidth",
+							ref: el => { this.twigInput = el; }
+						},
+						instructions: [
+							"Code to be executed in place of the fields output. You have access to the ",
+							h("code", {}, "element"),
+							" variable as well as all global & Craft variables.",
+						],
+					}),
+					f({
+						label: "Escape Value",
+						id: "out_escape",
+						tag: "input",
+						attr: {
+							type: "checkbox",
+							checked: true,
+							ref: el => { this.escapeInput = el; }
+						},
+						instructions: "If checked the output of the column will be escaped",
+					})
+				]),
+				h("div", { class: "footer" }, [
+					h("div", { class: "buttons right" }, [
+						h("button", {
+							class: "btn",
+							click: this.cancel.bind(this),
+						}, "Cancel"),
+						h("button", {
+							class: "btn submit",
+							click: this.update.bind(this),
+						}, "Update"),
 					]),
 				]),
-				{ autoShow: false }
-			);
-		},
+			]),
+			{ autoShow: false }
+		);
+	},
 
-		edit (e) {
-			e.preventDefault();
-			this.setValues(e.target);
-			this.modal.show();
-		},
+	edit (e) {
+		e.preventDefault();
+		this.setValues(e.target);
+		this.modal.show();
+	},
 
-		// Actions
-		// =====================================================================
+	// Actions
+	// =====================================================================
 
-		setValues (field) {
-			const fieldKey = field.dataset.key;
+	setValues (field) {
+		const fieldKey = field.dataset.key;
 
-			this.activeFieldId = fieldKey;
+		this.activeFieldId = fieldKey;
 
-			if (this.fields.hasOwnProperty(fieldKey)) {
-				const p = this.fields[fieldKey];
+		if (this.fields.hasOwnProperty(fieldKey)) {
+			const p = this.fields[fieldKey];
 
-				this.enabledInput.checked = p.enabled;
-				this.headingInput.value = p.heading;
-				this.twigInput.value = p.twig;
-				this.escapeInput.checked = p.escape;
+			this.enabledInput.checked = p.enabled;
+			this.headingInput.value = p.heading;
+			this.twigInput.value = p.twig;
+			this.escapeInput.checked = p.escape;
 
-				return;
-			}
+			return;
+		}
 
-			const f = this.fieldMap[fieldKey];
+		const f = this.fieldMap[fieldKey];
 
-			this.enabledInput.checked = false;
-			this.headingInput.value = f.name;
-			this.twigInput.value = `{{ element.${f.handle} }}`;
-			this.escapeInput.checked = true;
-		},
+		this.enabledInput.checked = false;
+		this.headingInput.value = f.name;
+		this.twigInput.value = `{{ element.${f.handle} }}`;
+		this.escapeInput.checked = true;
+	},
 
-		update () {
-			this.fields[this.activeFieldId] = {
-				enabled: this.enabledInput.checked,
-				heading: this.headingInput.value,
-				twig: this.twigInput.value,
-				escape: this.escapeInput.checked,
-			};
+	update () {
+		this.fields[this.activeFieldId] = {
+			enabled: this.enabledInput.checked,
+			heading: this.headingInput.value,
+			twig: this.twigInput.value,
+			escape: this.escapeInput.checked,
+		};
 
-			this.fieldSettings.value = JSON.stringify(this.fields);
+		this.fieldSettings.value = JSON.stringify(this.fields);
 
-			this.modal.hide();
-		},
+		this.modal.hide();
+	},
 
-		cancel () {
-			this.modal.hide();
-		},
+	cancel () {
+		this.modal.hide();
+	},
 
-	};
-}
+};

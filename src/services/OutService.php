@@ -5,10 +5,13 @@ namespace ether\out\services;
 use craft\base\Component;
 use craft\base\Element;
 use craft\base\Field;
+use ether\out\base\Integrations;
 use ether\out\elements\Export;
 
 class OutService extends Component
 {
+
+	private $_fields;
 
 	public function fields ()
 	{
@@ -32,6 +35,37 @@ class OutService extends Component
 			];
 
 		return $fields;
+	}
+
+	public function fieldsFromElementAndSource ($element, string $source)
+	{
+		$integrations = Integrations::fields();
+
+		if (!array_key_exists($element, $integrations))
+			return $this->fields();
+
+		/** @var Element $el */
+		$el = new $element;
+
+		$criteria = null;
+
+		foreach ($el->sources() as $src)
+			if (array_key_exists('key', $src) && $src['key'] === $source)
+				$criteria = $src['criteria'];
+
+		if (!$criteria)
+			return [];
+
+		$query = $el::find();
+
+		\Craft::configure($query, $criteria);
+
+		$firstElement = $query->one();
+
+		if (!$firstElement)
+			return [];
+
+		return $integrations[$element]($firstElement);
 	}
 
 	public function generate (Export $export)
@@ -72,6 +106,15 @@ class OutService extends Component
 		// TODO: If $query->count() is greater than X, split into multiple files and zip
 		\Craft::configure($query, $criteria);
 
+		$this->_fields = $this->fields();
+		$integrations = Integrations::fields();
+		if (array_key_exists($export->elementType, $integrations))
+		{
+			$one = $query->one();
+			if ($one)
+				$this->_fields = $integrations[$export->elementType]($query->one());
+		}
+
 		ob_start();
 
 		$out = fopen('php://output', 'w');
@@ -92,7 +135,7 @@ class OutService extends Component
 
 	private function _header (Export $export)
 	{
-		$fields        = $this->fields();
+		$fields        = $this->_fields;
 		$fieldSettings = $export->fieldSettings;
 
 		$header = [];
@@ -131,7 +174,7 @@ class OutService extends Component
 
 	private function _row (Export $export, Element $element)
 	{
-		$fields        = $this->fields();
+		$fields        = $this->_fields;
 		$fieldSettings = $export->fieldSettings;
 
 		$row = [];

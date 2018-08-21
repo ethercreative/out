@@ -15,6 +15,16 @@ interface IntegrationInterface
 	 * when an element of the keyed type is passed. Should be keyed with the
 	 * element class name (`Element::class`).
 	 *
+	 * Functions should return an array mirroring the following:
+	 * ```php
+	 * $fields = [
+	 *   'fieldIdOrHandle_MustBeUniqueAndConsistent' => [
+	 *     'name' => 'Field Name',
+	 *     'handle' => 'Field Handle',
+	 *   ]
+	 * ];
+	 * ```
+	 *
 	 * @return array
 	 */
 	public static function fields (): array;

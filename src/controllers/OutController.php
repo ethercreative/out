@@ -89,6 +89,7 @@ class OutController extends Controller
 				if (
 					!array_key_exists('key', $source)
 					|| !array_key_exists('label', $source)
+					|| $source['key'] === '*'
 				) continue;
 
 				$sources[] = [
@@ -109,10 +110,20 @@ class OutController extends Controller
 		}
 
 		// Fields
-		$variables['fields'] = Out::getInstance()->out->fields();
+		if ($exportId)
+		{
+			$variables['fields'] = Out::getInstance()->out->fieldsFromElementAndSource(
+				$variables['export']->elementType,
+				$variables['export']->elementSource
+			);
+		}
+		else
+		{
+			$variables['fields'] = Out::getInstance()->out->fields();
+		}
 
 		// Integrations
-		$variables['integrations'] = Integrations::fields();
+		$variables['integrations'] = array_keys(Integrations::fields());
 
 		// Asset
 		$craft->view->registerAssetBundle(OutAsset::class);
@@ -190,13 +201,29 @@ class OutController extends Controller
 
 		$csv = Out::getInstance()->out->generate($export);
 
-		header("Content-Type: application/csv");
-		header("Content-Disposition: attachment; filename={$filename}.csv");
-		header("Pragma: no-cache");
+//		header("Content-Type: application/csv");
+//		header("Content-Disposition: attachment; filename={$filename}.csv");
+//		header("Pragma: no-cache");
 
 		echo $csv;
 
 		\Craft::$app->end();
+	}
+
+	/**
+	 * @return \yii\web\Response
+	 * @throws \yii\web\BadRequestHttpException
+	 */
+	public function actionFields ()
+	{
+		$request = \Craft::$app->request;
+		$element = $request->getRequiredParam('element');
+		$source = $request->getRequiredParam('source');
+
+		return $this->asJson(Out::getInstance()->out->fieldsFromElementAndSource(
+			$element,
+			$source
+		));
 	}
 
 }
