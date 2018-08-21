@@ -1,4 +1,5 @@
 /** global: Craft, Garnish, $ */
+import "babel-polyfill";
 
 /**
  * Create Element
@@ -62,168 +63,32 @@ const f = function (config) {
 	]);
 };
 
-// window.Out = {
-//
-// 	// Properties
-// 	// =====================================================================
-//
-// 	fieldMap: {},
-// 	integrations: [],
-//
-// 	fields: {},
-// 	activeFieldId: null,
-//
-// 	modal: null,
-//
-// 	headingInput: null,
-// 	twigInput: null,
-// 	escapeInput: null,
-// 	enabledInput: null,
-//
-// 	fieldSettings: null,
-//
-// 	// Functions
-// 	// =====================================================================
-//
-// 	init (fieldMap, integrations) {
-// 		this.fieldMap = fieldMap;
-// 		this.integrations = integrations;
-//
-// 		this.fieldSettings = document.getElementById("fieldSettings");
-// 		this.fields = JSON.parse(this.fieldSettings.value);
-// 		if (Array.isArray(this.fields)) this.fields = {};
-//
-// 		const btns = document.getElementById("outFields").getElementsByTagName("button");
-// 		for (let i = 0, l = btns.length; i < l; ++i)
-// 			btns[i].addEventListener("click", this.edit.bind(this));
-//
-// 		this.modal = new Garnish.Modal(
-// 			h("div", { class: "modal out--modal" }, [
-// 				h("div", { class: "body" }, [
-// 					f({
-// 						label: "Enabled",
-// 						id: "out_enabled",
-// 						tag: "input",
-// 						attr: {
-// 							type: "checkbox",
-// 							checked: false,
-// 							ref: el => { this.enabledInput = el; }
-// 						},
-// 					}),
-// 					f({
-// 						label: "Column Heading",
-// 						id: "out_columnHeading",
-// 						tag: "input",
-// 						attr: {
-// 							class: "text fullwidth",
-// 							ref: el => { this.headingInput = el; }
-// 						},
-// 					}),
-// 					f({
-// 						label: "Twig",
-// 						id: "out_twig",
-// 						tag: "textarea",
-// 						attr: {
-// 							rows: 5,
-// 							class: "text fullwidth",
-// 							ref: el => { this.twigInput = el; }
-// 						},
-// 						instructions: [
-// 							"Code to be executed in place of the fields output. You have access to the ",
-// 							h("code", {}, "element"),
-// 							" variable as well as all global & Craft variables.",
-// 						],
-// 					}),
-// 					f({
-// 						label: "Escape Value",
-// 						id: "out_escape",
-// 						tag: "input",
-// 						attr: {
-// 							type: "checkbox",
-// 							checked: true,
-// 							ref: el => { this.escapeInput = el; }
-// 						},
-// 						instructions: "If checked the output of the column will be escaped",
-// 					})
-// 				]),
-// 				h("div", { class: "footer" }, [
-// 					h("div", { class: "buttons right" }, [
-// 						h("button", {
-// 							class: "btn",
-// 							click: this.cancel.bind(this),
-// 						}, "Cancel"),
-// 						h("button", {
-// 							class: "btn submit",
-// 							click: this.update.bind(this),
-// 						}, "Update"),
-// 					]),
-// 				]),
-// 			]),
-// 			{ autoShow: false }
-// 		);
-// 	},
-//
-// 	edit (e) {
-// 		e.preventDefault();
-// 		this.setValues(e.target);
-// 		this.modal.show();
-// 	},
-//
-// 	// Actions
-// 	// =====================================================================
-//
-// 	setValues (field) {
-// 		const fieldKey = field.dataset.key;
-//
-// 		this.activeFieldId = fieldKey;
-//
-// 		if (this.fields.hasOwnProperty(fieldKey)) {
-// 			const p = this.fields[fieldKey];
-//
-// 			this.enabledInput.checked = p.enabled;
-// 			this.headingInput.value = p.heading;
-// 			this.twigInput.value = p.twig;
-// 			this.escapeInput.checked = p.escape;
-//
-// 			return;
-// 		}
-//
-// 		const f = this.fieldMap[fieldKey];
-//
-// 		this.enabledInput.checked = false;
-// 		this.headingInput.value = f.name;
-// 		this.twigInput.value = `{{ element.${f.handle} }}`;
-// 		this.escapeInput.checked = true;
-// 	},
-//
-// 	update () {
-// 		this.fields[this.activeFieldId] = {
-// 			enabled: this.enabledInput.checked,
-// 			heading: this.headingInput.value,
-// 			twig: this.twigInput.value,
-// 			escape: this.escapeInput.checked,
-// 		};
-//
-// 		this.fieldSettings.value = JSON.stringify(this.fields);
-//
-// 		this.modal.hide();
-// 	},
-//
-// 	cancel () {
-// 		this.modal.hide();
-// 	},
-//
-// };
-
 class Out {
 
 	// Properties
 	// =========================================================================
 
+	static i = null;
+
 	activeType = "";
+	createModal = null;
+	editModal = null;
+
+	twigInput = null;
+	twigField = null;
+	splitInput = null;
+	splitField = null;
+
+	resolveCreate = null;
+	rejectCreate = null;
 
 	constructor () {
 		this.initElementTypeSwitcher();
+		this.initCreateModal();
+		this.initEditModal();
+		this.initFieldTable();
+
+		Out.i = this;
 	}
 
 	// Initializers
@@ -268,6 +133,273 @@ class Out {
 			// TODO: Update available fields
 		});
 	}
+
+	initFieldTable () {
+		const table = new Out.EditableTable(
+			"out_fields",
+			"fieldSettings",
+			{
+				"name": {
+					"heading": "Column Name",
+					"handle": "name",
+					"width": "",
+					"type": "singleline"
+				}
+			},
+			{
+				defaultValues: {},
+				minRows: null,
+				maxRows: null,
+			}
+		);
+
+		const rows = table.$tbody[0].getElementsByTagName("tr");
+
+		for (let i = 0, l = rows.length; i < l; ++i) {
+			const row = rows[i];
+			const settingsBtn = row.getElementsByClassName('settings')[0]
+				, twig = row.querySelectorAll("[name*='twig']")
+				, split = row.querySelectorAll("[name*='split']");
+
+			settingsBtn.addEventListener("click", e => {
+				e.preventDefault();
+				this.edit(twig, split);
+			});
+		}
+	}
+
+	initCreateModal () {
+		this.createModal = new Garnish.Modal(
+			h("div", { class: "modal out--modal" }, [
+				h("div", { class: "body" }, [
+					f({
+						label: "Field",
+						id: "out_createField",
+						tag: "div",
+						attr: {
+							class: "select",
+							id: null,
+						},
+						instructions: "Select a field to base the column on.",
+						children: h("select", { id: "out_createField" }, [
+							h("option", {}, "Hello"),
+						]),
+					})
+				]),
+				h("div", { class: "footer" }, [
+					h("div", { class: "secondary-buttons left" }, [
+						h("button", {
+							class: "btn submit",
+							click: this.createCustom.bind(this),
+						}, "Create Custom"),
+					]),
+					h("div", { class: "buttons right" }, [
+						h("button", {
+							class: "btn",
+							click: this.cancelCreate.bind(this),
+						}, "Cancel"),
+						h("button", {
+							class: "btn submit",
+							click: this.createCreate.bind(this),
+						}, "Create"),
+					]),
+				]),
+			]),
+			{ autoShow: false }
+		);
+	}
+
+	initEditModal () {
+		this.editModal = new Garnish.Modal(
+			h("div", { class: "modal out--modal" }, [
+				h("div", { class: "body" }, [
+					f({
+						label: "Twig",
+						id: "out_twig",
+						tag: "textarea",
+						attr: {
+							rows: 5,
+							class: "text fullwidth",
+							ref: el => { this.twigInput = el; }
+						},
+						instructions: [
+							"Code to be executed in place of the fields output. You have access to the ",
+							h("code", {}, "element"),
+							" variable as well as all global & Craft variables.",
+						],
+					}),
+					f({
+						label: "Split",
+						id: "out_split",
+						tag: "input",
+						attr: {
+							type: "checkbox",
+							checked: true,
+							ref: el => { this.splitInput = el; }
+						},
+						instructions: "If checked the output of the column will be split into additional columns at every comma.",
+					})
+				]),
+				h("div", { class: "footer" }, [
+					h("div", { class: "buttons right" }, [
+						h("button", {
+							class: "btn",
+							click: this.cancelEdit.bind(this),
+						}, "Cancel"),
+						h("button", {
+							class: "btn submit",
+							click: this.updateEdit.bind(this),
+						}, "Update"),
+					]),
+				]),
+			]),
+			{ autoShow: false }
+		);
+	}
+
+	// Events
+	// =========================================================================
+
+	create = async () => {
+		return new Promise((resolve, reject) => {
+			this.createModal.show();
+			this.resolveCreate = resolve;
+			this.rejectCreate = reject;
+		});
+	};
+
+	cancelCreate () {
+		this.rejectCreate();
+		this.createModal.hide();
+	}
+
+	createCreate () {
+		// TODO: Get fields from modal
+
+		this.resolveCreate({
+			name: "Test",
+			twig: "{{ element.fieldHandle }}",
+			split: 0,
+			type: "custom",
+		});
+
+		this.createModal.hide();
+	}
+
+	createCustom () {
+		this.resolveCreate({
+			name: "",
+			twig: "Add some twig code",
+			split: 0,
+			type: "custom",
+		});
+
+		this.createModal.hide();
+	}
+
+	edit ($twig, $split) {
+		this.twigField = $twig[0];
+		this.splitField = $split[0];
+
+		this.twigInput.value = $twig[0].value;
+		this.splitInput.checked = $split[0].value === '1';
+
+		this.editModal.show();
+	}
+
+	cancelEdit () {
+		this.editModal.hide();
+	}
+
+	updateEdit () {
+		this.twigField.value = this.twigInput.value;
+		this.splitField.value = this.splitInput.checked ? '1' : '0';
+
+		this.editModal.hide();
+	}
+
+	// Misc
+	// =========================================================================
+
+	static EditableTable = Craft.EditableTable.extend({
+		addRow: async function () {
+			if (!this.canAddRow())
+				return;
+
+			let values = null;
+
+			try {
+				values = await Out.i.create();
+			} catch (e) { return; }
+
+			const rowId = this.settings.rowIdPrefix + (this.biggestId + 1);
+			const $tr = this.createRow(
+				rowId,
+				this.columns,
+				this.baseName,
+				$.extend(values, this.settings.defaultValues)
+			);
+
+			$tr.appendTo(this.$tbody);
+			new Craft.EditableTable.Row(this, $tr);
+			this.sorter.addItems($tr);
+
+			$tr.find('textarea').first().trigger('focus');
+
+			this.rowCount++;
+			this.updateAddRowButton();
+
+			this.settings.onAddRow($tr);
+		},
+
+		createRow: function (rowId, columns, baseName, values) {
+			const $tr = this.base(rowId, columns, baseName, values);
+
+			$tr.children().first().after(
+				$('<td />', {
+					class: 'out--type'
+				}).append(
+					$('<span />').text(values.type)
+				)
+			);
+
+			const $editTd = $('<td />', {
+				class: 'thin action'
+			});
+
+			const $twig = $('<input />', {
+				type: "hidden",
+				name: `${baseName}[${rowId}][twig]`,
+				value: values.twig,
+			});
+
+			const $split = $('<input />', {
+				type: "hidden",
+				name: `${baseName}[${rowId}][split]`,
+				value: values.split,
+			});
+
+			$editTd.click(() => {
+				Out.i.edit($twig, $split);
+			});
+
+			$editTd.append(
+				$('<a />', {
+					class: 'settings icon',
+					title: Craft.t('app', "Settings"),
+				}),
+				$twig,
+				$split,
+				$('<input />', {
+					type: "hidden",
+					name: `${baseName}[${rowId}][type]`,
+					value: values.type,
+				})
+			).prependTo($tr);
+
+			return $tr;
+		}
+	});
 
 }
 

@@ -85,33 +85,41 @@ new Out();
 			errors: export.getErrors('title'),
 		}) }}
 
-		<table class="data fullwidth out--fields" id="outFields">
+		<input type="hidden" name="fieldSettings" value="">
+
+		<table class="shadow-box editable out--columns" id="out_fields">
 			<thead>
 			<tr>
-				<th>Column</th>
-				<th class="thin checkbox-cell"></th>
+				<th></th>
+				<th>Column Heading</th>
+				<th>Type</th>
+				<th colspan="2"></th>
 			</tr>
 			</thead>
 			<tbody>
-			{% for key, field in fields %}
-				<tr>
-					<td>
-						{% if key in export.fieldSettings|keys and export.fieldSettings[key].heading != field.name %}
-							{{ export.fieldSettings[key].heading }}
-							<small>({{ field.name }})</small>
-						{% else %}
-							{{ field.name }}
-						{% endif %}
-					</td>
+			{% for col in export.fieldSettings %}
+				<tr data-id="{{ loop.index }}">
 					<td class="thin action">
-						<button type="button" data-key="{{ key }}" class="settings icon" title="Edit"></button>
+						<a class="settings icon" title="Settings"></a>
+						<input type="hidden" name="fieldSettings[{{ loop.index }}][twig]" value="{{ col.twig }}">
+						<input type="hidden" name="fieldSettings[{{ loop.index }}][split]" value="{{ col.split }}">
+						<input type="hidden" name="fieldSettings[{{ loop.index }}][type]" value="{{ col.type }}">
 					</td>
+					<td class="textual">
+						<textarea name="fieldSettings[{{ loop.index }}][name]" rows="1">
+							{{- col.name -}}
+						</textarea>
+					</td>
+					<td class="out--type">
+						<span>{{ col.type }}</span>
+					</td>
+					<td class="thin action"><a class="move icon" title="Reorder"></a></td>
+					<td class="thin action"><a class="delete icon" title="Delete"></a></td>
 				</tr>
 			{% endfor %}
 			</tbody>
 		</table>
-
-		<input type="hidden" name="fieldSettings" id="fieldSettings" value="{{ export.fieldSettings|json_encode }}">
+		<div class="btn add icon">Add Column</div>
 	</div>
 
 {% endblock %}
@@ -170,15 +178,15 @@ new Out();
 			value: export.limit,
 		}) }}
 
-		{{ forms.dateField({
-			label: 'Start Date',
+		{{ forms.dateTimeField({
+			label: 'Before',
 			id: 'startDate',
 			name: 'startDate',
 			value: export.startDate,
 		}) }}
 
-		{{ forms.dateField({
-			label: 'End Date',
+		{{ forms.dateTimeField({
+			label: 'After',
 			id: 'endDate',
 			name: 'endDate',
 			value: export.endDate,

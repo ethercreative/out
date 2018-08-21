@@ -15,8 +15,6 @@ use ZipArchive;
 class OutService extends Component
 {
 
-	private $_fields;
-
 	public function fields ()
 	{
 		$fields = [
@@ -117,16 +115,6 @@ class OutService extends Component
 
 		\Craft::configure($query, $criteria);
 
-		// Get the fields
-		$this->_fields = $this->fields();
-		$integrations = Integrations::fields();
-		if (array_key_exists($export->elementType, $integrations))
-		{
-			$one = $query->one();
-			if ($one)
-				$this->_fields = $integrations[$export->elementType]($query->one());
-		}
-
 		$split = Out::getInstance()->getSettings()['split'];
 
 		if ($query->count() > $split)
@@ -208,38 +196,18 @@ class OutService extends Component
 
 	private function _header (Export $export)
 	{
-		$fields        = $this->_fields;
 		$fieldSettings = $export->fieldSettings;
 
 		$header = [];
 
-		/** @var Field $field */
-		foreach ($fields as $key => $field)
+		foreach ($fieldSettings as $field)
 		{
-			if (array_key_exists($key, $fieldSettings))
-			{
-				if (!$fieldSettings[$key]['enabled'])
-					continue;
+			$name = $field['name'];
+			$split = $field['split'] === '1';
 
-				$heading = $fieldSettings[$key]['heading'];
-				$escape = $fieldSettings[$key]['escape'];
-			}
-			else
-			{
-				continue;
-
-//				$heading = $field->name;
-//				$escape = true;
-			}
-
-			if ($escape) {
-				$header[] = $heading;
-			} else {
-				$header = array_merge(
-					$header,
-					explode(',', $heading)
-				);
-			}
+			// TODO: Split non-escaped commas only (, not ",")
+			if ($split) $header = array_merge($header, explode(',', $name));
+			else $header[] = $name;
 		}
 
 		return $header;
@@ -247,46 +215,23 @@ class OutService extends Component
 
 	private function _row (Export $export, Element $element)
 	{
-		$fields        = $this->_fields;
 		$fieldSettings = $export->fieldSettings;
 
 		$row = [];
 
-		/** @var Field $field */
-		foreach ($fields as $key => $field)
+		foreach ($fieldSettings as $field)
 		{
-			if (array_key_exists($key, $fieldSettings))
-			{
-				if (!$fieldSettings[$key]['enabled'])
-					continue;
-
-				$twig = $fieldSettings[$key]['twig'];
-				$escape = $fieldSettings[$key]['escape'];
-			}
-			else
-			{
-				continue;
-
-//				$twig = "{{ element.{$field->handle} }}";
-//				$escape = true;
-			}
+			$twig = $field['twig'];
+			$split = $field['split'] === '1';
 
 			$value = \Craft::$app->view->renderString(
 				$twig,
 				compact('element')
 			);
 
-			if ($escape)
-			{
-				$row[] = $value;
-			}
-			else
-			{
-				$row = array_merge(
-					$row,
-					explode(',', $value)
-				);
-			}
+			// TODO: Split non-escaped commas only (, not ",")
+			if ($split) $row = array_merge($row, explode(',', $value));
+			else $row[] = $value;
 		}
 
 		return $row;

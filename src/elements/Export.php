@@ -213,7 +213,10 @@ HTML;
 
 	public function setFieldSettings ($value)
 	{
-		$this->_fieldSettings = Json::decodeIfJson($value);
+		if (is_array($value))
+			return $this->_fieldSettings = $value;
+
+		return $this->_fieldSettings = Json::decodeIfJson($value);
 	}
 
 	public function getFieldSettings (): array
