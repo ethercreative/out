@@ -126,6 +126,13 @@ new Out();
 
 {% block details %}
 	<div id="settings" class="meta">
+		<div class="field out--warning">
+			<p class="warning">
+				Changing Element Type or Element Source
+				may cause some columns to no longer work.
+			</p>
+		</div>
+
 		{{ forms.selectField({
 			label: 'Element Type'|t('app'),
 			id: 'elementType',
@@ -140,7 +147,7 @@ new Out();
 				id: 'elementSource-' ~ type|replace('\\', '_'),
 				name: 'elementSource',
 				options: sources,
-				value: export.elementSource
+				value: export.elementSource,
 			} %}
 			{% embed '_includes/forms/field' with config|merge({
 				input: forms.select(config)
