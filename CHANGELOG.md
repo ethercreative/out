@@ -1,3 +1,11 @@
+## 3.0.1 - 2018-08-21
+### Added
+- Added option to select site when downloading export
+
+### Changed
+- Added Sprout Form support
+- Large exports can now be split into multiple files and downloaded as a Zip
+
 ## 3.0.0 - 2018-08-21
 ### Changed
 - Initial Release
