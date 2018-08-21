@@ -47,6 +47,7 @@ class SproutFormsIntegration implements IntegrationInterface
 			return array_reduce(
 				$element->getFields(),
 				function ($carry, Field $field) {
+					// Prefixing to ensure uniqueness
 					$carry['sproutForms_' . $field->id] = [
 						'name'   => $field->name,
 						'handle' => $field->handle,

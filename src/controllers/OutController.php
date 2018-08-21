@@ -201,9 +201,9 @@ class OutController extends Controller
 
 		$csv = Out::getInstance()->out->generate($export);
 
-//		header("Content-Type: application/csv");
-//		header("Content-Disposition: attachment; filename={$filename}.csv");
-//		header("Pragma: no-cache");
+		header("Content-Type: application/csv");
+		header("Content-Disposition: attachment; filename={$filename}.csv");
+		header("Pragma: no-cache");
 
 		echo $csv;
 
