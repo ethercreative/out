@@ -1,3 +1,7 @@
+## 3.0.4 - 2018-08-22
+### Fixed
+- Fixed permissions not being checked correctly
+
 ## 3.0.3 - 2018-08-22
 ### Fixed
 - Fixed Out index not showing for non-admin users with valid permissions

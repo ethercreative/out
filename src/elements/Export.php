@@ -248,7 +248,7 @@ HTML;
 	private static function _canCreate ()
 	{
 		return (
-			\Craft::$app->user->can('out_createExport')
+			\Craft::$app->user->checkPermission('out_createExport')
 			|| \Craft::$app->user->getIsAdmin()
 		);
 	}
@@ -256,8 +256,8 @@ HTML;
 	private static function _canDownload ()
 	{
 		return (
-			\Craft::$app->user->can('out_createExport')
-			|| \Craft::$app->user->can('out_downloadExport')
+			\Craft::$app->user->checkPermission('out_createExport')
+			|| \Craft::$app->user->checkPermission('out_downloadExport')
 			|| \Craft::$app->user->getIsAdmin()
 		);
 	}

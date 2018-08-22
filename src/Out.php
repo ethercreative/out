@@ -87,18 +87,18 @@ class Out extends Plugin
 	{
 		$user = \Craft::$app->user;
 
-		if ($user->can('accessOut') || $user->getIsAdmin())
+		if ($user->checkPermission('accessOut') || $user->getIsAdmin())
 			$event->rules['out'] = 'out/out/index';
 
-		if ($user->can('out_createExport') || $user->getIsAdmin())
+		if ($user->checkPermission('out_createExport') || $user->getIsAdmin())
 		{
 			$event->rules['out/new']               = 'out/out/edit';
 			$event->rules['out/<exportId:\d+>']    = 'out/out/edit';
 		}
 
 		if (
-			$user->can('out_createExport')
-			|| $user->can('out_downloadExport')
+			$user->checkPermission('out_createExport')
+			|| $user->checkPermission('out_downloadExport')
 			|| $user->getIsAdmin()
 		) {
 			$event->rules['out/dl/<exportId:\d+>'] = 'out/out/dl';
@@ -131,7 +131,7 @@ class Out extends Plugin
 	public function getCpNavItem ()
 	{
 		$user = \Craft::$app->user;
-		if (!$user->can('accessOut') || !$user->getIsAdmin())
+		if (!($user->checkPermission('accessOut') || $user->getIsAdmin()))
 			return null;
 
 		$item = parent::getCpNavItem();
