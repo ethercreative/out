@@ -70,7 +70,10 @@ class Out {
 
 	static i = null;
 
-	activeType = "";
+	activeType = null;
+	activeTypeClass = "";
+	activeSource = "";
+
 	createModal = null;
 	editModal = null;
 
@@ -113,6 +116,7 @@ class Out {
 				, input = f;
 
 			input.removeAttribute("style");
+			input.addEventListener("change", this.onSourceChange);
 
 			sourcesByType[t] = { comment, input };
 
@@ -121,6 +125,8 @@ class Out {
 		}
 
 		this.activeType = sourcesByType[elementType.value];
+		this.activeTypeClass = elementType.value;
+		this.activeSource = this.activeType.input.querySelector('select').value;
 
 		elementType.addEventListener("change", e => {
 			this.activeType.input.parentNode.replaceChild(
@@ -128,14 +134,17 @@ class Out {
 				this.activeType.input
 			);
 
-			this.activeType = sourcesByType[e.target.value];
+			this.activeTypeClass = e.target.value;
+			this.activeType = sourcesByType[this.activeTypeClass];
 
 			this.activeType.comment.parentNode.replaceChild(
 				this.activeType.input,
 				this.activeType.comment
 			);
 
-			// TODO: Update available fields
+			this.activeSource = this.activeType.input.querySelector('select').value;
+
+			this.updateFieldsSelect();
 		});
 	}
 
@@ -173,7 +182,7 @@ class Out {
 		}
 	}
 
-	initCreateModal (fields) {
+	initCreateModal () {
 		this.createModal = new Garnish.Modal(
 			h("div", { class: "modal out--modal" }, [
 				h("div", { class: "body" }, [
@@ -186,16 +195,7 @@ class Out {
 							id: null,
 						},
 						instructions: "Select a field to base the column on.",
-						children: h(
-							"select",
-							{
-								id: "out_createField",
-								ref: el => { this.fieldSelect = el; }
-							},
-							Object.values(fields)
-								.sort((a, b) => a.name.localeCompare(b.name))
-								.map(f => h("option", { value: f.handle }, f.name))
-						),
+						children: this.renderFieldsSelect(),
 					})
 				]),
 				h("div", { class: "footer" }, [
@@ -271,6 +271,11 @@ class Out {
 
 	// Events
 	// =========================================================================
+
+	onSourceChange = e => {
+		this.activeSource = e.target.value;
+		this.updateFieldsSelect();
+	};
 
 	create = async () => {
 		return new Promise((resolve, reject) => {
@@ -413,6 +418,21 @@ class Out {
 		}
 	});
 
+	renderFieldsSelect () {
+		return h(
+			"select",
+			{
+				id: "out_createField",
+				ref: el => {
+					this.fieldSelect = el;
+				}
+			},
+			Object.values(this.fields)
+				.sort((a, b) => a.name.localeCompare(b.name))
+				.map(f => h("option", { value: f.handle }, f.name))
+		);
+	}
+
 	// Helpers
 	// =========================================================================
 
@@ -435,6 +455,19 @@ class Out {
 			default:
 				return twig ? twig : `{{ element.${handle} }}`;
 		}
+	}
+
+	updateFieldsSelect () {
+		Craft.postActionRequest("out/out/fields", {
+			element: this.activeTypeClass,
+			source: this.activeSource,
+		}, fields => {
+			this.fields = fields;
+
+			const parent = this.fieldSelect.parentNode;
+			parent.removeChild(this.fieldSelect);
+			parent.appendChild(this.renderFieldsSelect());
+		});
 	}
 
 }

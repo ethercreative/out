@@ -1,3 +1,10 @@
+## 3.0.2 - 2018-08-22
+### Fixed
+- Fixed error when saving without any columns
+
+### Added
+- Switching element type / source updates the available fields
+
 ## 3.0.1 - 2018-08-21
 ### Added
 - Added option to select site when downloading export
