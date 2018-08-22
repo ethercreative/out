@@ -1,3 +1,7 @@
+## 3.0.5 - 2018-08-22
+### Fixed
+- Fixed create button not showing for users with valid permissions
+
 ## 3.0.4 - 2018-08-22
 ### Fixed
 - Fixed permissions not being checked correctly
