@@ -18,22 +18,29 @@ class OutService extends Component
 	public function fields ()
 	{
 		$fields = [
-			'title'       => ['name' => 'Title', 'handle' => 'title'],
+			'title'       => [
+				'name'   => 'Title',
+				'handle' => 'title',
+				'type'   => 'craft\fields\PlainText',
+			],
 			'dateCreated' => [
 				'name'   => 'Date Created',
-				'handle' => 'dateCreated'
+				'handle' => 'dateCreated',
+				'type'   => 'craft\fields\Date',
 			],
 			'dateUpdated' => [
 				'name'   => 'Date Updated',
-				'handle' => 'dateUpdated'
+				'handle' => 'dateUpdated',
+				'type'   => 'craft\fields\Date',
 			],
 		];
 
 		/** @var Field $field */
 		foreach (\Craft::$app->fields->getAllFields() as $field)
-			$fields[$field->id] = [
+			$fields[$field->handle] = [
 				'name'   => $field->name,
 				'handle' => $field->handle,
+				'type'   => get_class($field),
 			];
 
 		return $fields;

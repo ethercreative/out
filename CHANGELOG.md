@@ -2,6 +2,7 @@
 ### Added
 - Added option to select site when downloading export
 - Added Sprout Form support
+- Create columns from fields w/ pre-defined twig
 
 ### Changed
 - Large exports are now be split into multiple files and downloaded as a Zip

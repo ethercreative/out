@@ -33,9 +33,11 @@ class SproutFormsIntegration implements IntegrationInterface
 			return array_reduce(
 				$element->getFields(),
 				function ($carry, Field $field) {
-					$carry['sproutForms_' . $field->id] = [
+					$carry[$field->handle] = [
 						'name'   => $field->name,
 						'handle' => $field->handle,
+						'type'   => get_class($field),
+						'twig'   => "{{ element.{$field->handle} }}",
 					];
 					return $carry;
 				},
@@ -47,10 +49,11 @@ class SproutFormsIntegration implements IntegrationInterface
 			return array_reduce(
 				$element->getFields(),
 				function ($carry, Field $field) {
-					// Prefixing to ensure uniqueness
-					$carry['sproutForms_' . $field->id] = [
+					$carry[$field->handle] = [
 						'name'   => $field->name,
 						'handle' => $field->handle,
+						'type'   => get_class($field),
+						'twig'   => "{{ element.{$field->handle} }}",
 					];
 
 					return $carry;

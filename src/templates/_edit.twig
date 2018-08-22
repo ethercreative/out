@@ -60,8 +60,7 @@
 {% endblock %}
 
 {% js %}
-// Out.init({{ fields|json_encode|raw }}, {{ integrations|json_encode|raw }});
-new Out();
+new Out({{ fields|json_encode|raw }});
 {% endjs %}
 
 {% block content %}

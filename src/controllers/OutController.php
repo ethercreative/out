@@ -10,7 +10,6 @@ namespace ether\out\controllers;
 
 use craft\base\Element;
 use craft\helpers\DateTimeHelper;
-use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use ether\out\base\Integrations;

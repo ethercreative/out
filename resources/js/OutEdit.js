@@ -74,6 +74,9 @@ class Out {
 	createModal = null;
 	editModal = null;
 
+	fields = {};
+	fieldSelect = null;
+
 	twigInput = null;
 	twigField = null;
 	splitInput = null;
@@ -82,9 +85,11 @@ class Out {
 	resolveCreate = null;
 	rejectCreate = null;
 
-	constructor () {
+	constructor (fields) {
+		this.fields = fields;
+
 		this.initElementTypeSwitcher();
-		this.initCreateModal();
+		this.initCreateModal(fields);
 		this.initEditModal();
 		this.initFieldTable();
 
@@ -168,7 +173,7 @@ class Out {
 		}
 	}
 
-	initCreateModal () {
+	initCreateModal (fields) {
 		this.createModal = new Garnish.Modal(
 			h("div", { class: "modal out--modal" }, [
 				h("div", { class: "body" }, [
@@ -181,9 +186,16 @@ class Out {
 							id: null,
 						},
 						instructions: "Select a field to base the column on.",
-						children: h("select", { id: "out_createField" }, [
-							h("option", {}, "Hello"),
-						]),
+						children: h(
+							"select",
+							{
+								id: "out_createField",
+								ref: el => { this.fieldSelect = el; }
+							},
+							Object.values(fields)
+								.sort((a, b) => a.name.localeCompare(b.name))
+								.map(f => h("option", { value: f.handle }, f.name))
+						),
 					})
 				]),
 				h("div", { class: "footer" }, [
@@ -274,13 +286,13 @@ class Out {
 	}
 
 	createCreate () {
-		// TODO: Get fields from modal
+		const field = this.fields[this.fieldSelect.value];
 
 		this.resolveCreate({
-			name: "Test",
-			twig: "{{ element.fieldHandle }}",
+			name: field.name,
+			twig: Out.getTwigFromField(field),
 			split: 0,
-			type: "custom",
+			type: field.type,
 		});
 
 		this.createModal.hide();
@@ -400,6 +412,30 @@ class Out {
 			return $tr;
 		}
 	});
+
+	// Helpers
+	// =========================================================================
+
+	static getTwigFromField (field) {
+		const { type, handle, twig } = field;
+
+		switch (type) {
+			case "craft\\commerce\\fields\\Variants":
+			case "craft\\commerce\\fields\\Products":
+			case "craft\\fields\\Tags":
+			case "craft\\fields\\Entries":
+			case "craft\\fields\\Categories":
+				return `{% for el in element.${handle}.all() %}
+	{{ el.title ~ (not loop.last ? ',') }}
+{% endfor %}`;
+			case "craft\\fields\\Assets":
+				return `{% for file in element.${handle}.all() %}
+	{{ file.url ~ (not loop.last ? ',') }}
+{% endfor %}`;
+			default:
+				return twig ? twig : `{{ element.${handle} }}`;
+		}
+	}
 
 }
 
