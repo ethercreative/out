@@ -224,7 +224,7 @@ HTML;
 		if (is_array($this->_fieldSettings))
 			return $this->_fieldSettings;
 
-		return $this->_fieldSettings = Json::decode($this->_fieldSettings);
+		return $this->_fieldSettings = Json::decode($this->_fieldSettings ?: '{}');
 	}
 
 	// Helpers
