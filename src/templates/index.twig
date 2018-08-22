@@ -3,7 +3,7 @@
 {% set elementType = 'ether\\out\\elements\\Export' %}
 
 {% block actionButton %}
-	{% if craft.app.user.can('out_createExport') or craft.app.user.isAdmin %}
+	{% if craft.app.user.checkPermission('out_createExport') or craft.app.user.isAdmin %}
 		<a href="{{ url('out/new') }}" class="btn submit">New {{ exportName }}</a>
 	{% endif %}
 {% endblock %}
