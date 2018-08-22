@@ -131,7 +131,7 @@ class Out extends Plugin
 	public function getCpNavItem ()
 	{
 		$user = \Craft::$app->user;
-		if (!$user->can('accessOut') && !$user->getIsAdmin())
+		if (!$user->can('accessOut') || !$user->getIsAdmin())
 			return null;
 
 		$item = parent::getCpNavItem();
