@@ -50,6 +50,11 @@ class OutController extends BaseController
 		$fields   = [
 			"-1" => [
 				[
+					"name" => "ID",
+					"handle" => "id",
+					"type" => "Number",
+				],
+				[
 					"name" => "Title",
 				    "handle" => "title",
 				    "type" => "Plain Text",
