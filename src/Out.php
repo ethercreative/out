@@ -8,6 +8,9 @@
 
 namespace ether\out;
 
+use Cassandra\Set;
+use Craft;
+use craft\base\Model;
 use craft\base\Plugin;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
@@ -19,7 +22,12 @@ use ether\out\base\Integrations;
 use ether\out\elements\Export;
 use ether\out\models\Settings;
 use ether\out\services\OutService;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
+use Twig_Error_Loader;
 use yii\base\Event;
+use yii\base\Exception;
 
 
 /**
@@ -74,7 +82,7 @@ class Out extends Plugin
 		// Integrations
 		// ---------------------------------------------------------------------
 
-		$request = \Craft::$app->request;
+		$request = Craft::$app->request;
 		if ($request->isCpRequest && strpos($request->url, 'out') !== false)
 			Integrations::register();
 
@@ -85,7 +93,7 @@ class Out extends Plugin
 
 	public function onRegisterCpUrlRules (RegisterUrlRulesEvent $event)
 	{
-		$user = \Craft::$app->user;
+		$user = Craft::$app->user;
 
 		if ($user->checkPermission('accessOut') || $user->getIsAdmin())
 			$event->rules['out'] = 'out/out/index';
@@ -130,7 +138,7 @@ class Out extends Plugin
 
 	public function getCpNavItem ()
 	{
-		$user = \Craft::$app->user;
+		$user = Craft::$app->user;
 		if (!($user->checkPermission('accessOut') || $user->getIsAdmin()))
 			return null;
 
@@ -150,13 +158,23 @@ class Out extends Plugin
 	}
 
 	/**
+	 * @return bool|Model|null|Settings
+	 */
+	public function getSettings ()
+	{
+		return parent::getSettings();
+	}
+
+	/**
 	 * @return null|string
-	 * @throws \Twig_Error_Loader
-	 * @throws \yii\base\Exception
+	 * @throws Exception
+	 * @throws LoaderError
+	 * @throws RuntimeError
+	 * @throws SyntaxError
 	 */
 	protected function settingsHtml ()
 	{
-		return \Craft::$app->getView()->renderTemplate(
+		return Craft::$app->getView()->renderTemplate(
 			'out/settings', [
 			'settings' => $this->getSettings()
 		]);

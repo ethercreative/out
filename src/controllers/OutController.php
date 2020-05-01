@@ -8,7 +8,9 @@
 
 namespace ether\out\controllers;
 
+use Craft;
 use craft\base\Element;
+use craft\errors\ElementNotFoundException;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
@@ -17,7 +19,13 @@ use ether\out\elements\Export;
 use ether\out\Out;
 use ether\out\web\assets\OutAsset;
 use ether\out\web\assets\OutIndexAsset;
+use Throwable;
+use yii\base\Exception;
+use yii\base\ExitException;
+use yii\base\InvalidConfigException;
+use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
+use yii\web\Response;
 
 
 /**
@@ -31,12 +39,12 @@ class OutController extends Controller
 {
 
 	/**
-	 * @return \yii\web\Response
-	 * @throws \yii\base\InvalidConfigException
+	 * @return Response
+	 * @throws InvalidConfigException
 	 */
 	public function actionIndex ()
 	{
-		\Craft::$app->view->registerAssetBundle(OutIndexAsset::class);
+		Craft::$app->view->registerAssetBundle(OutIndexAsset::class);
 
 		return $this->renderTemplate('out/index', [
 			'pluginName' => Out::getInstance()->getSettings()->pluginName,
@@ -47,13 +55,13 @@ class OutController extends Controller
 	/**
 	 * @param string|null $exportId
 	 *
-	 * @return \yii\web\Response
+	 * @return Response
 	 * @throws HttpException
-	 * @throws \yii\base\InvalidConfigException
+	 * @throws InvalidConfigException
 	 */
 	public function actionEdit ($exportId = null)
 	{
-		$craft = \Craft::$app;
+		$craft = Craft::$app;
 
 		$variables = [
 			'continueEditingUrl' => 'out/{id}',
@@ -145,17 +153,18 @@ class OutController extends Controller
 	}
 
 	/**
-	 * @throws \Throwable
-	 * @throws \craft\errors\ElementNotFoundException
-	 * @throws \yii\base\Exception
-	 * @throws \yii\web\BadRequestHttpException
+	 * @throws Throwable
+	 * @throws ElementNotFoundException
+	 * @throws Exception
+	 * @throws BadRequestHttpException
 	 */
 	public function actionSave ()
 	{
-		$request = \Craft::$app->request;
+		$request = Craft::$app->request;
 
 		$export = new Export();
 		$export->id = $request->getParam('exportId');
+		$export->uid = $request->getParam('exportUid');
 		$export->title = $request->getRequiredParam('title');
 		$export->elementType = $request->getRequiredParam('elementType');
 		$export->elementSource = $request->getRequiredParam('elementSource');
@@ -166,14 +175,14 @@ class OutController extends Controller
 		$export->endDate = DateTimeHelper::toDateTime($request->getParam('endDate')) ?: null;
 		$export->fieldSettings = $request->getParam('fieldSettings');
 
-		if (\Craft::$app->elements->saveElement($export))
+		if (Craft::$app->elements->saveElement($export))
 			return $this->redirectToPostedUrl($export);
 
-		\Craft::$app->getSession()->setError(
-			\Craft::t('out', 'Couldn’t save export.')
+		Craft::$app->getSession()->setError(
+			Craft::t('out', 'Couldn’t save export.')
 		);
 
-		\Craft::$app->getUrlManager()->setRouteParams([
+		Craft::$app->getUrlManager()->setRouteParams([
 			'export' => $export
 		]);
 
@@ -181,13 +190,13 @@ class OutController extends Controller
 	}
 
 	/**
-	 * @throws \Throwable
-	 * @throws \yii\web\BadRequestHttpException
+	 * @throws Throwable
+	 * @throws BadRequestHttpException
 	 */
 	public function actionDelete ()
 	{
-		$exportId = \Craft::$app->getRequest()->getRequiredBodyParam('exportId');
-		\Craft::$app->elements->deleteElementById($exportId);
+		$exportId = Craft::$app->getRequest()->getRequiredBodyParam('exportId');
+		Craft::$app->elements->deleteElementById($exportId);
 
 		return $this->redirect(UrlHelper::cpUrl('out'));
 	}
@@ -196,15 +205,15 @@ class OutController extends Controller
 	 * @param $exportId
 	 *
 	 * @throws HttpException
-	 * @throws \yii\base\ExitException
+	 * @throws ExitException
 	 */
 	public function actionDl ($exportId)
 	{
 		/** @var Export $export */
 		$export = Export::find()->id($exportId)->one();
-		$siteId = \Craft::$app->request->getParam(
+		$siteId = Craft::$app->request->getParam(
 			'siteId',
-			\Craft::$app->sites->primarySite->id
+			Craft::$app->sites->primarySite->id
 		);
 
 		if (!$export) throw new HttpException(404);
@@ -213,12 +222,12 @@ class OutController extends Controller
 	}
 
 	/**
-	 * @return \yii\web\Response
-	 * @throws \yii\web\BadRequestHttpException
+	 * @return Response
+	 * @throws BadRequestHttpException
 	 */
 	public function actionFields ()
 	{
-		$request = \Craft::$app->request;
+		$request = Craft::$app->request;
 		$element = $request->getRequiredParam('element');
 		$source = $request->getRequiredParam('source');
 

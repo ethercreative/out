@@ -1,6 +1,7 @@
 ## 3.0.6 - 2020-05-01
 ### Fixed
 - Fix `Array to string conversion` error when saving new export (Fixes #3)
+- Fix missing UID error on saving existing export (Fixes #4)
 
 ## 3.0.5 - 2018-08-22
 ### Fixed

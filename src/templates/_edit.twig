@@ -69,6 +69,7 @@ new Out({{ fields|json_encode|raw }});
 
 	{% if export.id %}
 		<input type="hidden" name="exportId" value="{{ export.id }}">
+		<input type="hidden" name="exportUid" value="{{ export.uid }}">
 	{% endif %}
 
 	<div id="fields">
