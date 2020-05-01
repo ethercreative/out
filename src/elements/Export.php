@@ -170,12 +170,12 @@ class Export extends Element
 			$sites = Craft::$app->sites->getAllSites();
 
 			if (count($sites) === 1)
-				return '<a href="' . $dl . '?site=' . $sites[0]->id . '" title="Download">' . $icon . '</a>';
+				return '<a href="' . $dl . '?siteId=' . $sites[0]->id . '" title="Download">' . $icon . '</a>';
 
 			$actions = '';
 
 			foreach ($sites as $site)
-				$actions .= '<li><a href="' . $dl . '?site=' . $site->id . '">' . $site->name . '</a></li>';
+				$actions .= '<li><a href="' . $dl . '?siteId=' . $site->id . '">' . $site->name . '</a></li>';
 
 			return <<<HTML
 <a data-out-dl>$icon</a>
