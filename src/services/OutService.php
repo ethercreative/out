@@ -2,6 +2,7 @@
 
 namespace ether\out\services;
 
+use Craft;
 use craft\base\Component;
 use craft\base\Element;
 use craft\base\Field;
@@ -10,6 +11,7 @@ use craft\helpers\StringHelper;
 use ether\out\base\Integrations;
 use ether\out\elements\Export;
 use ether\out\Out;
+use yii\base\ExitException;
 use ZipArchive;
 
 class OutService extends Component
@@ -36,7 +38,7 @@ class OutService extends Component
 		];
 
 		/** @var Field $field */
-		foreach (\Craft::$app->fields->getAllFields() as $field)
+		foreach (Craft::$app->fields->getAllFields() as $field)
 			$fields[$field->handle] = [
 				'name'   => $field->name,
 				'handle' => $field->handle,
@@ -67,7 +69,7 @@ class OutService extends Component
 
 		$query = $el::find();
 
-		\Craft::configure($query, $criteria);
+		Craft::configure($query, $criteria);
 
 		$firstElement = $query->one();
 
@@ -81,7 +83,7 @@ class OutService extends Component
 	 * @param Export $export
 	 * @param int    $siteId
 	 *
-	 * @throws \yii\base\ExitException
+	 * @throws ExitException
 	 */
 	public function generate (Export $export, int $siteId)
 	{
@@ -120,7 +122,7 @@ class OutService extends Component
 		/** @var ElementQuery $query */
 		$query = $element::find()->siteId($siteId);
 
-		\Craft::configure($query, $criteria);
+		Craft::configure($query, $criteria);
 
 		$split = Out::getInstance()->getSettings()['split'];
 
@@ -134,19 +136,19 @@ class OutService extends Component
 	 * @param              $export
 	 * @param ElementQuery $query
 	 *
-	 * @throws \yii\base\ExitException
+	 * @throws ExitException
 	 */
 	private function _renderSingle ($export, ElementQuery $query)
 	{
 		$filename = StringHelper::toKebabCase($export->title);
 
-		header("Content-Type: application/csv");
-		header("Content-Disposition: attachment; filename={$filename}.csv");
-		header("Pragma: no-cache");
+		header('Content-Type: application/csv');
+		header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
+		header('Pragma: no-cache');
 
 		echo $this->_renderCsv($export, $query);
 
-		\Craft::$app->end();
+		exit(200);
 	}
 
 	private function _renderMultiple ($export, ElementQuery $query, $split)
@@ -157,7 +159,7 @@ class OutService extends Component
 		$filename = StringHelper::toKebabCase($export->title);
 
 
-		$file = @tempnam("tmp", "zip");
+		$file = @tempnam('tmp', 'zip');
 		$zip = new ZipArchive();
 		$zip->open($file, ZipArchive::CREATE);
 
@@ -231,7 +233,7 @@ class OutService extends Component
 			$twig = $field['twig'];
 			$split = $field['split'] === '1';
 
-			$value = \Craft::$app->view->renderString(
+			$value = Craft::$app->view->renderString(
 				$twig,
 				compact('element')
 			);
