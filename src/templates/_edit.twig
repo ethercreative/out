@@ -127,7 +127,7 @@ new Out({{ fields|json_encode|raw }});
 {% block details %}
 	<div id="settings" class="meta">
 		{% if not isNewExport %}
-			<div class="field out--warning">
+			<div class="field out--warning" style="padding:12px 24px!important">
 				<p class="warning">
 					Changing Element Type or Element Source
 					may cause some columns to no longer work.

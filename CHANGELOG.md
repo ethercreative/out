@@ -2,6 +2,7 @@
 ### Fixed
 - Fix `Array to string conversion` error when saving new export (Fixes #3)
 - Fix missing UID error on saving existing export (Fixes #4)
+- Fix broken export link site ID (Fixes #6)
 
 ## 3.0.5 - 2018-08-22
 ### Fixed

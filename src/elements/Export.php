@@ -165,17 +165,17 @@ class Export extends Element
 		{
 			$icon = '<svg height="19px" version="1.1" viewBox="0 0 14 19" width="14px" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd" stroke="none" stroke-width="1"><g fill="#0d78f2" transform="translate(-383.000000, -213.000000)"><g transform="translate(383.000000, 213.500000)"><path d="M14,6 L10,6 L10,0 L4,0 L4,6 L0,6 L7,13 L14,6 L14,6 Z M0,15 L0,17 L14,17 L14,15 L0,15 L0,15 Z" /></g></g></g></svg>';
 
-			$dl = UrlHelper::cpUrl('out/dl/' . $this->id . '?site=');
+			$dl = UrlHelper::cpUrl('out/dl/' . $this->id);
 
 			$sites = Craft::$app->sites->getAllSites();
 
 			if (count($sites) === 1)
-				return '<a href="' . $dl . $sites[0]->id . '" title="Download">' . $icon . '</a>';
+				return '<a href="' . $dl . '?site=' . $sites[0]->id . '" title="Download">' . $icon . '</a>';
 
 			$actions = '';
 
 			foreach ($sites as $site)
-				$actions .= '<li><a href="' . $dl . $site->id . '">' . $site->name . '</a></li>';
+				$actions .= '<li><a href="' . $dl . '?site=' . $site->id . '">' . $site->name . '</a></li>';
 
 			return <<<HTML
 <a data-out-dl>$icon</a>
