@@ -4,6 +4,7 @@
 - Fix missing UID error on saving existing export (Fixes #4)
 - Fix broken export link site ID (Fixes #6)
 - Fix header warning in export
+- Fix date output error by defaulting the `|atom` filter (Fixes #2) 
 
 ## 3.0.5 - 2018-08-22
 ### Fixed

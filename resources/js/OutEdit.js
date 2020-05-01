@@ -1,5 +1,4 @@
-/** global: Craft, Garnish, $ */
-import "babel-polyfill";
+/* global Craft, Garnish, $ */
 
 /**
  * Create Element
@@ -452,6 +451,8 @@ class Out {
 				return `{% for file in element.${handle}.all() %}
 	{{ file.url ~ (not loop.last ? ',') }}
 {% endfor %}`;
+			case "craft\\fields\\Date":
+				return `{{ element.${handle}|atom }}`;
 			default:
 				return twig ? twig : `{{ element.${handle} }}`;
 		}
