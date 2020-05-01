@@ -8,13 +8,16 @@
 
 namespace ether\out\elements;
 
+use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\Json;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
+use DateTime;
 use ether\out\elements\db\ExportQuery;
 use ether\out\Out;
+use yii\base\Exception;
 use yii\helpers\Inflector;
 
 
@@ -48,10 +51,10 @@ class Export extends Element
 	/** @var int|null */
 	public $limit = null;
 
-	/** @var \DateTime|null */
+	/** @var DateTime|null */
 	public $startDate = null;
 
-	/** @var \DateTime|null */
+	/** @var DateTime|null */
 	public $endDate = null;
 
 	/** @var string|array */
@@ -84,20 +87,20 @@ class Export extends Element
 	 * @param bool $isNew
 	 *
 	 * @throws \yii\db\Exception
-	 * @throws \yii\base\Exception
+	 * @throws Exception
 	 */
 	public function afterSave (bool $isNew)
 	{
 		if ($isNew)
 		{
-			\Craft::$app->db->createCommand()->insert(
+			Craft::$app->db->createCommand()->insert(
 				'{{%out_exports}}',
 				array_merge($this->_map(), ['id' => $this->id])
 			)->execute();
 		}
 		else
 		{
-			\Craft::$app->db->createCommand()->update(
+			Craft::$app->db->createCommand()->update(
 				'{{%out_exports}}',
 				$this->_map(),
 				['id' => $this->id]
@@ -131,9 +134,9 @@ class Export extends Element
 	protected static function defineTableAttributes (): array
 	{
 		$attrs = [
-			'title'       => ['label' => \Craft::t('app', 'Title')],
-			'dateCreated' => ['label' => \Craft::t('app', 'Date Created')],
-			'dateUpdated' => ['label' => \Craft::t('app', 'Date Updated')],
+			'title'       => ['label' => Craft::t('app', 'Title')],
+			'dateCreated' => ['label' => Craft::t('app', 'Date Created')],
+			'dateUpdated' => ['label' => Craft::t('app', 'Date Updated')],
 		];
 
 		if (self::_canDownload())
@@ -164,7 +167,7 @@ class Export extends Element
 
 			$dl = UrlHelper::cpUrl('out/dl/' . $this->id . '?site=');
 
-			$sites = \Craft::$app->sites->getAllSites();
+			$sites = Craft::$app->sites->getAllSites();
 
 			if (count($sites) === 1)
 				return '<a href="' . $dl . $sites[0]->id . '" title="Download">' . $icon . '</a>';
@@ -190,9 +193,9 @@ HTML;
 	public static function sortOptions (): array
 	{
 		return [
-			'title'       => \Craft::t('app', 'Title'),
-			'dateCreated' => \Craft::t('app', 'Date Created'),
-			'dateUpdated' => \Craft::t('app', 'Date Updated'),
+			'title'       => Craft::t('app', 'Title'),
+			'dateCreated' => Craft::t('app', 'Date Created'),
+			'dateUpdated' => Craft::t('app', 'Date Updated'),
 		];
 	}
 
@@ -241,24 +244,24 @@ HTML;
 			'limit'         => $this->limit,
 			'startDate'     => $this->startDate,
 			'endDate'       => $this->endDate,
-			'fieldSettings' => $this->fieldSettings,
+			'fieldSettings' => Json::encode($this->fieldSettings),
 		];
 	}
 
 	private static function _canCreate ()
 	{
 		return (
-			\Craft::$app->user->checkPermission('out_createExport')
-			|| \Craft::$app->user->getIsAdmin()
+			Craft::$app->user->checkPermission('out_createExport')
+			|| Craft::$app->user->getIsAdmin()
 		);
 	}
 
 	private static function _canDownload ()
 	{
 		return (
-			\Craft::$app->user->checkPermission('out_createExport')
-			|| \Craft::$app->user->checkPermission('out_downloadExport')
-			|| \Craft::$app->user->getIsAdmin()
+			Craft::$app->user->checkPermission('out_createExport')
+			|| Craft::$app->user->checkPermission('out_downloadExport')
+			|| Craft::$app->user->getIsAdmin()
 		);
 	}
 

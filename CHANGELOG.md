@@ -1,3 +1,7 @@
+## 3.0.6 - 2020-05-01
+### Fixed
+- Fix `Array to string conversion` error when saving new export (Fixes #3)
+
 ## 3.0.5 - 2018-08-22
 ### Fixed
 - Fixed create button not showing for users with valid permissions
