@@ -1,3 +1,7 @@
+## 3.0.7 - 2020-05-04
+### Changed
+- Remove Crafts "Export" button from Out element type
+
 ## 3.0.6 - 2020-05-01
 ### Fixed
 - Fix `Array to string conversion` error when saving new export (Fixes #3)

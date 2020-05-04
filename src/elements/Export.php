@@ -211,6 +211,11 @@ HTML;
 		];
 	}
 
+	protected static function defineExporters (string $source): array
+	{
+		return [];
+	}
+
 	// Getters / Setters
 	// =========================================================================
 
